@@ -2,3 +2,5 @@ fastapi
 protobuf
 protoc-gen-http-python
 grpcio-tools
+python-dotenv~=1.0.0
+SQLAlchemy~=2.0.15
