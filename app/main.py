@@ -1,4 +1,5 @@
 import glob
+import json
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -22,7 +23,6 @@ def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str
 def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[Request], _Any]:
     async def endpoint(request: Request) -> _Any:
         body = await request.body()
-        print(body)
         return handler(request.path_params, body)
     return endpoint
 
@@ -42,5 +42,5 @@ if __name__ == '__main__':
     #     module_name = file_path.replace(".py", "").replace("\\", ".")
     #     print(module_name)
     #     module = importlib.import_module(module_name)
-    register_user_http_server(register_fastapi_route, UserServiceImpl, parse_request, parse_reply)
+    register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
     uvicorn.run(app)
