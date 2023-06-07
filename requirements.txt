@@ -7,3 +7,4 @@ SQLAlchemy~=2.0.15
 uvicorn~=0.22.0
 googleapis-common-protos
 googleapis-common-protos-stubs
+PyJWT

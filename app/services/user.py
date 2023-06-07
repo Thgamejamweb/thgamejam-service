@@ -1,4 +1,4 @@
-from app.utils.router_register import register_fastapi_route, parse_request, parse_reply
+from app.modules.router_register.router_register import register_fastapi_route, parse_request, parse_reply
 from thgamejam.api.user.user_pb2_http import UserServicer, register_user_http_server
 from thgamejam.api.user import user_pb2 as thgamejam_dot_api_dot_user_dot_user__pb2
 
