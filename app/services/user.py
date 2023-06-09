@@ -8,6 +8,7 @@ class UserServiceImpl(UserServicer):
     def test(self,
              request: thgamejam_dot_api_dot_user_dot_user__pb2.TestRequest) -> thgamejam_dot_api_dot_user_dot_user__pb2.TestReply:
         reply = thgamejam_dot_api_dot_user_dot_user__pb2.TestReply()
+        print(request)
         reply.test1 = request.test
         return reply
 
