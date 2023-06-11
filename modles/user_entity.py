@@ -6,7 +6,7 @@ from modles.base_model import BaseModel
 base = declarative_base()
 
 
-class User(BaseModel, base):
+class UserEntity(BaseModel, base):
     __tablename__ = 'user'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
@@ -14,5 +14,5 @@ class User(BaseModel, base):
     email = Column(String(50), nullable=True, comment='邮箱')
     password = Column(String(50), nullable=False, comment='密码')
 
-
-
+    def __repr__(self):
+        return f"UserEntity(id={self.id}, name='{self.name}', email='{self.email}', password='{self.password}')"

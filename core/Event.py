@@ -3,12 +3,13 @@ from typing import Callable
 from fastapi import FastAPI
 
 from core.app import app
-from database.mysql import engine
+from database.mysql import database
 
 
 def startup(app: FastAPI) -> Callable:
     async def app_startup() -> None:
         print("启动")
+        database.get_db_connection()
         pass
 
     return app_startup
