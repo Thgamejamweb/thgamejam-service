@@ -1,6 +1,6 @@
 import datetime
 
-from app.utils.JWTUtil import generateToken, parserToken
+from modules.JWTUtil import generateToken, parserToken
 
 if __name__ == '__main__':
     token = generateToken("aa", {"a": "a"}, datetime.datetime.utcnow() + datetime.timedelta(seconds=1))
