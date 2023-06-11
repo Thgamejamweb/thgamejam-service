@@ -3,7 +3,7 @@ import importlib
 
 import uvicorn
 
-from core.router_register import app
+from core.app import app
 
 service_file = glob.glob('services/*.py')
 

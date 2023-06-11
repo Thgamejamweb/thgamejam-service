@@ -1,13 +1,14 @@
 import json
 
-from fastapi import Request, FastAPI
+from fastapi import Request
 from fastapi.routing import APIRoute
 from typing import Callable as _Callable, Any as _Any, Dict as _Dict
 
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.message import Message
 
-app = FastAPI()
+from core.Event import startup
+from core.app import app
 
 
 def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str, _Any], bytes], _Any]):
