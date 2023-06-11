@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 cd ..
-set "protoDir=.\proto\thgamejam"
+set "protoDir=.\proto\api"
 
 for /r "%protoDir%" %%f in (*.proto) do (
     set "filePath=%%f"
