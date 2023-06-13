@@ -20,8 +20,8 @@ class TokenProvideInterceptor(BaseHTTPMiddleware):
         # 在请求之前设置上下文数据
         response = await call_next(request)
 
-        mctx = request_context
-        print(mctx)
+        # mctx = request_context.get()
+        # print(mctx)
 
         return response
 

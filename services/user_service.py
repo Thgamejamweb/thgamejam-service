@@ -32,6 +32,8 @@ class UserServiceImpl(UserServicer):
         session = database.get_db_session()
         user = verify_user_password(request.username, request.password, session)
 
+        # request_context.set(UserContext(userid=user.id))
+
         request_context.set(UserContext(userid=user.id))
 
         return LoginReply(user=UserInfo(username=user.name))
