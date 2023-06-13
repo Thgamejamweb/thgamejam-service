@@ -1,6 +1,6 @@
 fastapi~=0.96.0
 protobuf
-protoc-gen-http-python==1.0.0rc1
+protoc-gen-pyhttp
 grpcio-tools
 python-dotenv~=1.0.0
 SQLAlchemy~=2.0.15
@@ -8,3 +8,4 @@ uvicorn~=0.22.0
 googleapis-common-protos
 googleapis-common-protos-stubs
 PyJWT
+PyCryptoDome

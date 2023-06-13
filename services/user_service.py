@@ -1,39 +1,33 @@
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from Crypto.PublicKey import RSA
 
+from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply
 from core.router_register import register_fastapi_route, parse_request, parse_reply
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
-from api.thgamejam.user import user_pb2, user_pb2 as api_dot_thgamejam_dot_user_dot_user__pb2
+from dao.user_dao import get_userinfo_by_username, update_userinfo
 from database.mysql import database
-
-from modles.user_entity import UserEntity
 
 
 class UserServiceImpl(UserServicer):
 
-    def testC(self,
-              request: google_dot_protobuf_dot_empty__pb2.Empty) -> api_dot_thgamejam_dot_user_dot_user__pb2.TestReply:
+    def GetUserPublicKey(self, request: GetUserPublicKeyRequest) -> GetUserPublicKeyReply:
+        # 获取session
         session = database.get_db_session()
-        data = session.query(UserEntity).all()
-        print(data)
-        reply = user_pb2.TestReply()
-        reply.test1 = 1
-        return reply
+        user = get_userinfo_by_username(request.username, session)
 
-    def testR(self,
-              request: google_dot_protobuf_dot_empty__pb2.Empty) -> api_dot_thgamejam_dot_user_dot_user__pb2.TestReply:
-        reply = user_pb2.TestReply()
-        reply.test1 = 1
-        return reply
+        # 验证公私钥是否存在
+        if user.public_key is None:
+            key = RSA.generate(2048)
+            user.private_key = key.export_key().decode('utf-8')
+            user.public_key = key.publickey().export_key().decode('utf-8')
 
-    def testU(self,
-              request: google_dot_protobuf_dot_empty__pb2.Empty) -> api_dot_thgamejam_dot_user_dot_user__pb2.TestReply:
+            update_userinfo(user, session)
+            return GetUserPublicKeyReply(public_key=user.public_key)
+        else:
+            return GetUserPublicKeyReply(public_key=user.public_key)
+
+    def Login(self,
+              request: LoginRequest) -> LoginReply:
         pass
-
-    def testD(self,
-              request: google_dot_protobuf_dot_empty__pb2.Empty) -> api_dot_thgamejam_dot_user_dot_user__pb2.TestReply:
-        reply = user_pb2.TestReply()
-        reply.test1 = 1
-        return reply
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)

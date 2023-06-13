@@ -13,6 +13,8 @@ class UserEntity(BaseModel, base):
     name = Column(String(64), nullable=True, comment='用户名')
     email = Column(String(50), nullable=True, comment='邮箱')
     password = Column(String(50), nullable=False, comment='密码')
+    public_key = Column(String(4096))
+    private_key = Column(String(4096))
 
     def __repr__(self):
         return f"UserEntity(id={self.id}, name='{self.name}', email='{self.email}', password='{self.password}')"

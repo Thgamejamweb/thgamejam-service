@@ -4,8 +4,6 @@ from sqlalchemy.dialects.mysql import BIT
 from sqlalchemy.orm import Session
 
 
-
-
 class BaseModel:
     ctime = Column(DateTime, nullable=True, default=datetime.utcnow, comment='创建时间')
     mtime = Column(DateTime, nullable=True, default=datetime.utcnow, onupdate=datetime.utcnow, comment='修改时间')
