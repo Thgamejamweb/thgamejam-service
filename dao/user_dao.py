@@ -6,7 +6,6 @@ from modles.user_entity import UserEntity
 
 def get_userinfo_by_username(username: str, session: Session) -> UserEntity:
     try:
-
         user = session.query(UserEntity).filter(UserEntity.name == username, UserEntity.deleted == False).one()
         return user
     except NoResultFound:
@@ -21,3 +20,11 @@ def update_userinfo(user: UserEntity, session: Session) -> bool:
     except:
         session.rollback()
         return False
+
+
+def verify_user_password(username: str, password: str, session: Session) -> UserEntity:
+    try:
+        user = session.query(UserEntity).filter(UserEntity.name == username, UserEntity.password == password, UserEntity.deleted == False).one()
+        return user
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="UserInfo can not found or password is incorrect")
