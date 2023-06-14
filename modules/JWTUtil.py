@@ -1,25 +1,19 @@
-import base64
 import datetime
-from typing import Any
+from typing import Any, Type
 
 import jwt
 
 
-def generateKey(secretKey: str) -> bytes:
-    if len(secretKey) < 32:
-        return base64.b64encode(secretKey.ljust(32, '0').encode('utf-8'))
-    return base64.b64encode(secretKey.encode('utf-8'))
-
-
-def generateToken(secret_key: str, data: Any, date: datetime.datetime) -> str:
+def generateToken(secret_key: str, data: Any, date: datetime.datetime, expiration_time: int) -> str:
+    expiration_date = date + datetime.timedelta(seconds=expiration_time)
     token = jwt.encode(
-        {"user": data, "exp": date},
+        {"user": data.__dict__(), "exp": expiration_date},
         secret_key,
         algorithm="HS256"
     )
     return token
 
 
-def parserToken(secret_key: str, token: str) -> str:
+def parserToken(secret_key: str, token: str, data: Type[Any]) -> Any:
     decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
-    return decoded_token["user"]
+    return data(decoded_token["user"])
