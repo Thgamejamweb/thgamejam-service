@@ -28,7 +28,7 @@ class UserContext:
 request_context: ContextVar[UserContext] = ContextVar("request_context")
 token_provide_router = ["/web/v1/user/login",
                         "/web/v1/user/register"]
-token_check_router = []
+token_check_router = ["/web/v1/user/change/password"]
 
 
 # 注册函数中间件
@@ -40,7 +40,6 @@ def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str
 # 拦截器
 def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[Request], _Any]:
     async def endpoint(request: Request) -> _Any:
-
         token_check_interceptor(request)
 
         body = await request.body()

@@ -2,11 +2,12 @@ from Crypto.PublicKey import RSA
 from fastapi import HTTPException
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
-    UserInfo, RegisterUserRequest, RegisterUserReply
+    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
-from dao.user_dao import get_userinfo_by_username, update_userinfo, verify_user_password, create_userinfo
+from dao.user_dao import get_userinfo_by_username, update_userinfo, verify_user_password, create_userinfo, \
+    get_userinfo_by_id
 from database.mysql import database
 from modles.user_entity import UserEntity
 
@@ -58,6 +59,23 @@ class UserServiceImpl(UserServicer):
             return RegisterUserReply(id=u.id, username=u.name)
         else:
             raise HTTPException(status_code=404, detail="User has exist")
+
+    def ChangePassword(self, request: ChangePasswordRequest) -> ChangePasswordReply:
+        session = database.get_db_session()
+
+        user = get_userinfo_by_id(request_context.get().userid, session)
+        if user is None:
+            raise HTTPException(status_code=404, detail="UserInfo not find")
+        else:
+            if user.password == request.old_password:
+                user.password = request.new_password
+
+                if update_userinfo(user, session):
+                    return ChangePasswordReply(id=user.id)
+                else:
+                    raise HTTPException(status_code=500, detail="error")
+            else:
+                raise HTTPException(status_code=401, detail="Password error")
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
