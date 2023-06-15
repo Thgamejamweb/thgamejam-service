@@ -1,7 +1,5 @@
-from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from fastapi import HTTPException
-from sqlalchemy.exc import NoResultFound
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
     UserInfo, RegisterUserRequest, RegisterUserReply
@@ -55,6 +53,8 @@ class UserServiceImpl(UserServicer):
             user.private_key = key.export_key().decode('utf-8')
             user.public_key = key.publickey().export_key().decode('utf-8')
             u = create_userinfo(user, session)
+
+            request_context.set(UserContext(userid=user.id))
             return RegisterUserReply(id=u.id, username=u.name)
         else:
             raise HTTPException(status_code=404, detail="User has exist")

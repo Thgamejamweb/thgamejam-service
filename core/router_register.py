@@ -26,7 +26,8 @@ class UserContext:
 
 
 request_context: ContextVar[UserContext] = ContextVar("request_context")
-token_provide_router = ["/web/v1/user/login"]
+token_provide_router = ["/web/v1/user/login",
+                        "/web/v1/user/register"]
 token_check_router = []
 
 
