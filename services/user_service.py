@@ -1,12 +1,16 @@
+from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
+from fastapi import HTTPException
+from sqlalchemy.exc import NoResultFound
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
-    UserInfo
+    UserInfo, RegisterUserRequest, RegisterUserReply
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
-from dao.user_dao import get_userinfo_by_username, update_userinfo, verify_user_password
+from dao.user_dao import get_userinfo_by_username, update_userinfo, verify_user_password, create_userinfo
 from database.mysql import database
+from modles.user_entity import UserEntity
 
 
 class UserServiceImpl(UserServicer):
@@ -15,6 +19,8 @@ class UserServiceImpl(UserServicer):
         # 获取session
         session = database.get_db_session()
         user = get_userinfo_by_username(request.username, session)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not exist")
 
         # 验证公私钥是否存在
         if user.public_key is None:
@@ -35,6 +41,23 @@ class UserServiceImpl(UserServicer):
         request_context.set(UserContext(userid=user.id))
 
         return LoginReply(user=UserInfo(username=user.name))
+
+    def RegisterUser(self, request: RegisterUserRequest) -> RegisterUserReply:
+        session = database.get_db_session()
+
+        user_info = get_userinfo_by_username(request.username, session)
+        if user_info is None:
+            key = RSA.generate(2048)
+
+            user = UserEntity()
+            user.name = request.username
+            user.password = request.password
+            user.private_key = key.export_key().decode('utf-8')
+            user.public_key = key.publickey().export_key().decode('utf-8')
+            u = create_userinfo(user, session)
+            return RegisterUserReply(id=u.id, username=u.name)
+        else:
+            raise HTTPException(status_code=404, detail="User has exist")
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
