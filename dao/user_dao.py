@@ -1,8 +1,12 @@
 from typing import Any
 
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
 from fastapi import HTTPException
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
+
+from core.Helper import encrypt_data, decrypt_data
 from modles.user_entity import UserEntity
 
 
@@ -31,15 +35,19 @@ def create_userinfo(user: UserEntity, session: Session) -> UserEntity:
         return user
     except Exception as e:
         session.rollback()
+
         print(f"Error occurred while creating user: {e}")
         return None
 
 
-
 def verify_user_password(username: str, password: str, session: Session) -> UserEntity:
     try:
-        user = session.query(UserEntity).filter(UserEntity.name == username, UserEntity.password == password,
-                                                UserEntity.deleted == False).one()
-        return user
+        user = session.query(UserEntity).filter(UserEntity.name == username, UserEntity.deleted == False).one()
+        psw = decrypt_data(password, user.private_key)
+
+        if psw == user.password:
+            return user
+        else:
+            raise HTTPException(status_code=403, detail="Password error")
     except NoResultFound:
         raise HTTPException(status_code=404, detail="UserInfo can not found or password is incorrect")
