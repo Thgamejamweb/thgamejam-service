@@ -14,6 +14,9 @@ class Config(BaseSettings):
     POOL_SIZE = os.getenv("POOL_SIZE")
     POOL_RECYCLE = os.getenv("POOL_RECYCLE")
     CONNECT_TIMEOUT = os.getenv("CONNECT_TIMEOUT")
+    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
+    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
 
 
 settings = Config()
