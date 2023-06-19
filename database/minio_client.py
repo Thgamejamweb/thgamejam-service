@@ -17,7 +17,6 @@ class MinioClient:
                 secret_key=settings.MINIO_SECRET_KEY,
                 secure=False
             )
-
         print("对象存储连接成功")
         self.connection_is_active = True
         return self.client
@@ -27,3 +26,9 @@ class MinioClient:
 
 
 minio_client = MinioClient()
+
+
+def listen_minio_events():
+    with minio_client.client.listen_bucket_notification('web', '') as events:
+        for event in events:
+            print(event)

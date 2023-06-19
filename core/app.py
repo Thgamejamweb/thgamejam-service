@@ -1,8 +1,9 @@
+import threading
 from typing import Callable
 
 from fastapi import FastAPI
 
-from database.minio_client import minio_client
+from database.minio_client import minio_client, listen_minio_events
 from database.mysql import database
 
 app = FastAPI()
@@ -13,6 +14,8 @@ def startup(app: FastAPI) -> Callable:
         print("启动")
         database.get_db_connection()
         minio_client.get_minio_connection()
+        thread = threading.Thread(target=listen_minio_events)
+        thread.start()
         pass
 
     return app_startup
