@@ -1,12 +1,8 @@
-from typing import Any
 
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.PublicKey import RSA
-from fastapi import HTTPException
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
-from core.Helper import encrypt_data, decrypt_data
+from core.Helper import decrypt_data
 from modles.user_entity import UserEntity
 
 

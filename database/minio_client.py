@@ -23,7 +23,7 @@ class MinioClient:
         self.connection_is_active = True
         return self.client
 
-    def get_minio_client(self):
+    def get_minio_client(self) -> Minio:
         return self.client
 
 
