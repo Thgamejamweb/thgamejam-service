@@ -26,10 +26,13 @@ class UserContext:
 
 
 request_context: ContextVar[UserContext] = ContextVar("request_context")
+
 token_provide_router = ["/web/v1/user/login",
                         "/web/v1/user/register"]
+
 token_check_router = ["/web/v1/user/change/password",
-                      "/web/v1/user/id"]
+                      "/web/v1/user/id",
+                      "/web/v1/user/change/description"]
 
 
 # 注册函数中间件

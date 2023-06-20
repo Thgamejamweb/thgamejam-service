@@ -3,7 +3,8 @@ from fastapi import HTTPException
 from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
-    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserTokenInfoReply
+    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserTokenInfoReply, \
+    ChangeDescriptionRequest
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
@@ -75,6 +76,16 @@ class UserServiceImpl(UserServicer):
 
     def GetUserTokenInfo(self, request: Empty) -> GetUserTokenInfoReply:
         return GetUserTokenInfoReply(id=request_context.get().userid)
+
+    def ChangeDescription(self, request: ChangeDescriptionRequest) -> Empty:
+        session = database.get_db_session()
+        user = get_userinfo_by_id(request_context.get().userid, session)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not find")
+
+        user.description = request.description
+        update_userinfo(user, session)
+        return Empty()
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
