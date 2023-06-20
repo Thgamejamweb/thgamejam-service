@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import asdict
 from typing import Any, Type
 
 import jwt
@@ -14,6 +15,6 @@ def generateToken(secret_key: str, data: Any, expiration_time: int) -> str:
     return token
 
 
-def parserToken(secret_key: str, token: str, data: Type[Any]) -> Any:
+def parserToken(secret_key: str, token: str, data: Type[Any]) -> dict:
     decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"], options={"verify_exp": True})
-    return data(decoded_token["user"])
+    return decoded_token["user"]

@@ -56,8 +56,6 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
 
 
 def token_check_interceptor(request: Request):
-    request_context.set(UserContext(userid=0))
-
     if any(request.url.path.startswith(router) for router in token_check_router):
         token = request.cookies.get("token")
 
@@ -66,7 +64,7 @@ def token_check_interceptor(request: Request):
         else:
             try:
                 user_ctx = parserToken(settings.JWT_SECRET_KEY, token, UserContext)
-                request_context.set(user_ctx)
+                request_context.set(UserContext(userid=user_ctx['userid']))
 
             except InvalidSignatureError:
                 raise HTTPException(status_code=401, detail="Signature verification failed")
