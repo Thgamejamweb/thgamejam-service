@@ -1,8 +1,9 @@
 from Crypto.PublicKey import RSA
 from fastapi import HTTPException
+from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
-    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply
+    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserTokenInfoReply
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
@@ -71,6 +72,9 @@ class UserServiceImpl(UserServicer):
         user.password = request.new_password
         update_userinfo(user, session)
         return ChangePasswordReply(id=user.id)
+
+    def GetUserTokenInfo(self, request: Empty) -> GetUserTokenInfoReply:
+        return GetUserTokenInfoReply(id=request_context.get().userid)
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
