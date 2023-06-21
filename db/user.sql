@@ -2,6 +2,7 @@ CREATE TABLE user
 (
     id              BIGINT(20) PRIMARY KEY AUTO_INCREMENT   COMMENT 'id',
     name            VARCHAR(64)                NULL         COMMENT '用户名',
+    avatar_image    VARCHAR(64)                NULL         COMMENT '用户头像',
     email           VARCHAR(50)                NULL         COMMENT '邮箱',
     password        VARCHAR(50)                NOT NULL     COMMENT '密码',
     description     VARCHAR(100)               NULL         COMMENT '用户描述',
