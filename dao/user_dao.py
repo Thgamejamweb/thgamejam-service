@@ -1,3 +1,4 @@
+from typing import List
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session

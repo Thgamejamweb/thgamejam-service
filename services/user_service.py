@@ -3,8 +3,8 @@ from fastapi import HTTPException
 from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
-    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserTokenInfoReply, \
-    ChangeDescriptionRequest
+    UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserIdInfoReply, \
+    ChangeDescriptionRequest, GetUserIdByNameRequest
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
@@ -74,8 +74,8 @@ class UserServiceImpl(UserServicer):
         update_userinfo(user, session)
         return ChangePasswordReply(id=user.id)
 
-    def GetUserTokenInfo(self, request: Empty) -> GetUserTokenInfoReply:
-        return GetUserTokenInfoReply(id=request_context.get().userid)
+    def GetUserTokenInfo(self, request: Empty) -> GetUserIdInfoReply:
+        return GetUserIdInfoReply(id=request_context.get().userid)
 
     def ChangeDescription(self, request: ChangeDescriptionRequest) -> Empty:
         session = database.get_db_session()
@@ -86,6 +86,12 @@ class UserServiceImpl(UserServicer):
         user.description = request.description
         update_userinfo(user, session)
         return Empty()
+
+    def GetUserIdByName(self, request: GetUserIdByNameRequest) -> GetUserIdInfoReply:
+        session = database.get_db_session()
+        user = get_userinfo_by_username(request.name, session)
+
+        return GetUserIdInfoReply(id=user.id)
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
