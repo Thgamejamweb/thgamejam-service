@@ -1,4 +1,4 @@
-CREATE TABLE works
+CREATE TABLE works_info
 (
     id              BIGINT(20) PRIMARY KEY AUTO_INCREMENT   COMMENT 'id',
     name            VARCHAR(64)                NOT NULL     COMMENT '作品名',
