@@ -11,7 +11,7 @@ message Database {
 
 message JWT {
   string secret_key = 1;
-  string expiration_time = 2;
+  int32 expiration_time = 2;
 }
 
 message ObjectStorage {
