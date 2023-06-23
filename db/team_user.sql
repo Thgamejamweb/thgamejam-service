@@ -1,4 +1,4 @@
-CREATE TABLE team
+CREATE TABLE team_user
 (
     id              BIGINT(20) PRIMARY KEY AUTO_INCREMENT   COMMENT 'id',
     team_id         BIGINT(20)                 NOT NULL     COMMENT '团队id',
