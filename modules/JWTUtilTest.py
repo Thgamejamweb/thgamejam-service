@@ -1,12 +1,16 @@
-from datetime import datetime
+from modules.JWTUtil import generateToken
 
-from config.conf import settings
-from core.router_register import UserContext
-from modules.JWTUtil import generateToken, parserToken
+
+class UserContext:
+    def __init__(self, userid: int):
+        self.userid = userid
+
+    def __dict__(self):
+        return {
+            'userid': self.userid
+        }
+
 
 if __name__ == '__main__':
-    conf = settings.get()
-    token = generateToken(conf.jwt.secret_key, UserContext(userid=1), 1)
-    print(conf.jwt.expiration_time)
+    token = generateToken("in_my_long_forgotten_cloistered_sleep", UserContext(userid=3), 604800)
     print(token)
-    print(parserToken(conf.jwt.secret_key, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJpZCI6MX0sImV4cCI6MTY4Njc1MTEyMn0.FOr_LeNfwplg-_r1xavOkiP-0Hpgfu8coeoeIVde81w", UserContext).__dict__())
