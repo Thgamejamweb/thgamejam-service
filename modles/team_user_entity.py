@@ -14,3 +14,9 @@ class TeamUserEntity(BaseModel, base):
     user_id = Column(BigInteger, nullable=False, comment='用户id')
     is_admin = Column(Boolean, nullable=False, comment='是否为管理员')
     is_join = Column(Boolean, nullable=False, comment='是否加入')
+
+    def __init__(self, team_id: int, user_id: int = None, is_admin: bool = None, is_join: bool = None):
+        self.team_id = team_id
+        self.user_id = user_id
+        self.is_admin = is_admin
+        self.is_join = is_join

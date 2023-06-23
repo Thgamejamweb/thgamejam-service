@@ -48,7 +48,7 @@ class UserServiceImpl(UserServicer):
 
         user_info = get_userinfo_by_username(request.username, session)
         if user_info is not None:
-            raise HTTPException(status_code=404, detail="User has exist")
+            raise HTTPException(status_code=409, detail="User has exist")
 
         key = RSA.generate(2048)
         user = UserEntity()

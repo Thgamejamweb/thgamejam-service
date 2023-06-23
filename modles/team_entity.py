@@ -11,3 +11,6 @@ class TeamEntity(BaseModel, base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String(20), nullable=False, comment='团队名')
+
+    def __init__(self, name: str = None):
+        self.name = name
