@@ -10,8 +10,8 @@ from google.protobuf.message import Message
 from jwt import InvalidSignatureError, ExpiredSignatureError
 from starlette.responses import JSONResponse
 
-from config import settings
-from core.app import app
+from config.conf import settings
+from core.app import instance
 from modules.JWTUtil import generateToken, parserToken
 
 
@@ -33,13 +33,16 @@ token_provide_router = ["/web/v1/user/login",
 token_check_router = ["/web/v1/user/change/password",
                       "/web/v1/user/id",
                       "/web/v1/user/change/description",
-                      "/web/v1/file/upload/url"]
+                      "/web/v1/file/upload/url",
+                      "/web/v1/team"]
+
+conf = settings.get()
 
 
 # 注册函数中间件
 def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str, _Any], bytes], _Any]):
     custom_route = APIRoute(url, endpoint=register(handler), methods=[methods])
-    app.routes.append(custom_route)
+    instance.http.routes.append(custom_route)
 
 
 # 拦截器
@@ -64,7 +67,7 @@ def token_check_interceptor(request: Request):
             raise HTTPException(status_code=401, detail="Unauthorized Token")
         else:
             try:
-                user_ctx = parserToken(settings.JWT_SECRET_KEY, token, UserContext)
+                user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
                 request_context.set(UserContext(userid=user_ctx['userid']))
 
             except InvalidSignatureError:
@@ -78,7 +81,7 @@ def token_check_interceptor(request: Request):
 def token_provide_interceptor(request: Request, response: JSONResponse) -> JSONResponse:
     if any(request.url.path.startswith(router) for router in token_provide_router):
         try:
-            jwt = generateToken(settings.JWT_SECRET_KEY, request_context.get(), int(settings.JWT_EXPIRATION_TIME))
+            jwt = generateToken(conf.jwt.secret_key, request_context.get(), conf.jwt.expiration_time)
             response.set_cookie("token", jwt)
         except LookupError:
             pass

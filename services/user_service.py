@@ -10,7 +10,7 @@ from core.router_register import register_fastapi_route, parse_request, parse_re
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
 from dao.user_dao import get_userinfo_by_username, update_userinfo, verify_user_password, create_userinfo, \
     get_userinfo_by_id
-from database.mysql import database
+from core.app import instance
 from modles.user_entity import UserEntity
 
 
@@ -18,7 +18,7 @@ class UserServiceImpl(UserServicer):
 
     def GetUserPublicKey(self, request: GetUserPublicKeyRequest) -> GetUserPublicKeyReply:
         # 获取session
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
         user = get_userinfo_by_username(request.username, session)
         if user is None:
             raise HTTPException(status_code=404, detail="User not exist")
@@ -36,7 +36,7 @@ class UserServiceImpl(UserServicer):
         return GetUserPublicKeyReply(public_key=user.public_key)
 
     def Login(self, request: LoginRequest) -> LoginReply:
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
         user = verify_user_password(request.username, request.password, session)
 
         request_context.set(UserContext(userid=user.id))
@@ -44,11 +44,11 @@ class UserServiceImpl(UserServicer):
         return LoginReply(user=UserInfo(username=user.name))
 
     def RegisterUser(self, request: RegisterUserRequest) -> RegisterUserReply:
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
 
         user_info = get_userinfo_by_username(request.username, session)
         if user_info is not None:
-            raise HTTPException(status_code=404, detail="User has exist")
+            raise HTTPException(status_code=409, detail="User has exist")
 
         key = RSA.generate(2048)
         user = UserEntity()
@@ -62,7 +62,7 @@ class UserServiceImpl(UserServicer):
         return RegisterUserReply(id=u.id, username=u.name)
 
     def ChangePassword(self, request: ChangePasswordRequest) -> ChangePasswordReply:
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
             raise HTTPException(status_code=404, detail="UserInfo not find")
@@ -78,7 +78,7 @@ class UserServiceImpl(UserServicer):
         return GetUserIdInfoReply(id=request_context.get().userid)
 
     def ChangeDescription(self, request: ChangeDescriptionRequest) -> Empty:
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
             raise HTTPException(status_code=404, detail="User not find")
@@ -88,7 +88,7 @@ class UserServiceImpl(UserServicer):
         return Empty()
 
     def GetUserIdByName(self, request: GetUserIdByNameRequest) -> GetUserIdInfoReply:
-        session = database.get_db_session()
+        session = instance.database.get_db_session()
         user = get_userinfo_by_username(request.name, session)
 
         return GetUserIdInfoReply(id=user.id)

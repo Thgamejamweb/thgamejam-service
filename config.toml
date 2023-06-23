@@ -1,0 +1,15 @@
+[database]
+source = "mysql+pymysql://<username>:<password>@<host>:<port>/<database_name>"
+pool_timeout = 15
+pool_size = 20
+connect_timeout = 60
+pool_recycle = 3600
+
+[jwt]
+secret_key = "secret_key"
+expiration_time = 604800
+
+[oss]
+endpoint = "<host>:<port>"
+access_key = "access_key"
+secret_key = "secret_key"

@@ -1,24 +1,26 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from config import settings
+from config.conf_pb2 import Bootstrap
 from modles.base_model import CustomSession
 
 
 class Database:
+    conf: Bootstrap
 
-    def __init__(self) -> None:
+    def __init__(self, conf: Bootstrap) -> None:
         self.connection_is_active = False
         self.engine = None
+        self.conf = conf
 
     def get_db_connection(self):
         if not self.connection_is_active:
-            connect_args = {"connect_timeout": int(settings.CONNECT_TIMEOUT)}
+            connect_args = {"connect_timeout": self.conf.database.connect_timeout}
             try:
-                self.engine = create_engine(settings.DATA_BASE_URL,
-                                            pool_size=int(settings.POOL_SIZE),
-                                            pool_recycle=int(settings.POOL_RECYCLE),
-                                            pool_timeout=int(settings.POOL_TIMEOUT),
+                self.engine = create_engine(self.conf.database.source,
+                                            pool_size=self.conf.database.pool_size,
+                                            pool_recycle=self.conf.database.pool_recycle,
+                                            pool_timeout=self.conf.database.pool_timeout,
                                             connect_args=connect_args)
                 print("数据库连接成功")
                 self.connection_is_active = True
@@ -36,6 +38,3 @@ class Database:
         except Exception as e:
             print("Error getting DB session:", e)
             return None
-
-
-database = Database()
