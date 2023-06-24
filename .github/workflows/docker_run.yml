@@ -71,6 +71,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            mkdir -p ~/${{ steps.vars.outputs.name }}
             cd ~/${{ steps.vars.outputs.name }}
             echo "${{ vars.DOCKER_COMPOSE }}" > docker-compose.yml
 
