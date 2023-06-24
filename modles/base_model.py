@@ -11,7 +11,8 @@ class BaseModel:
 
 
 class CustomSession(Session):
-    def delete(self, model: BaseModel):
+    def delete(self, model):
         if hasattr(model, 'deleted'):
             model.deleted = True
-        self.add(model)
+        print(type(model))
+        self.merge(model)

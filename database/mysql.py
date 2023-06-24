@@ -32,9 +32,8 @@ class Database:
         if self.connection_is_active is False:
             self.get_db_connection()  # 确保数据库引擎已经被创建和配置
         try:
-            Session = sessionmaker(bind=self.engine, class_=CustomSession)
-            session = Session()
-            return session
+            session = sessionmaker(bind=self.engine, class_=CustomSession)
+            return session()
         except Exception as e:
             print("Error getting DB session:", e)
             return None
