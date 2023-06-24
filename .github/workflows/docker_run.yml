@@ -36,10 +36,10 @@ jobs:
       - name: Set outputs
         id: vars
         run: |
-          echo 'repository=${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
-          echo 'name=${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
-          echo 'sha_short=`echo ${{ github.sha }} | cut -c1-8`' >> $GITHUB_OUTPUT
-          echo 'image_name=${{ vars.DOCKER_REGISTRY_URL }}/${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
+          echo "repository=${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
+          echo "name=${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
+          echo "sha_short=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_OUTPUT
+          echo "image_name=${{ vars.DOCKER_REGISTRY_URL }}/${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
 
       # 修改配置文件
       - name: Modify config
