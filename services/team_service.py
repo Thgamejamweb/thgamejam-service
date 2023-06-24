@@ -7,7 +7,7 @@ from api.thgamejam.team.team_pb2_http import TeamServicer, register_team_http_se
 from core.app import instance
 from core.router_register import parse_request, parse_reply, register_fastapi_route, request_context
 from dao.team_dao import get_team_number_by_team_id, create_team, verify_user_id_team_admin, change_team_name, \
-    add_user_into_team, get_user_add_team_info, user_join_team, delete_user_in_team_info
+    add_user_into_team, get_user_add_team_info, user_join_team, delete_user_in_team_info, delete_team
 from dao.user_dao import get_userinfo_by_id
 
 
@@ -63,7 +63,13 @@ class TeamServiceImpl(TeamServicer):
         return CreateTeamReply(team_id=team.id)
 
     def DeleteTeam(self, request: DeleteTeamRequest) -> Empty:
-        pass
+        session = instance.database.get_db_session()
+        is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
+        if is_admin is not True:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        delete_team(request.team_id, session)
+        return Empty()
 
     def ChangeTeamName(self, request: ChangeTeamNameRequest) -> Empty:
         session = instance.database.get_db_session()
