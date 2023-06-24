@@ -1,0 +1,115 @@
+name: CI/CD Pipeline
+
+### 配置
+
+# vars.NAMESPACE            容器命名空间
+# vars.REPOSITORY           容器名称
+# vars.DOCKER_REGISTRY_URL  docker仓库url
+# vars.DOCKER_COMPOSE       docker-compose文件内容
+
+# secrets.DOCKER_REGISTRY_USERNAME  docker仓库登录用户
+# secrets.DOCKER_REGISTRY_PASSWORD  docker仓库登录密码
+# secrets.ROBOT_GIT_KEY             用于拉取代码的github机器人密钥
+# secrets.SSH_HOST                  目标服务器
+# secrets.SSH_USERNAME              目标服务器登录用户
+# secrets.SSH_KEY                   目标服务器登录密钥
+# secrets.TOML_CONFIG               配置文件内容
+
+on:
+  workflow_dispatch: # 手动触发
+  push:
+    branches: # 触发条件：推送到指定分支
+      - dev
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.ROBOT_GIT_KEY }}
+          submodules: 'recursive' # 获取子模块
+
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "repository=${{ vars.REPOSITORY }" >> $GITHUB_OUTPUT
+          echo "name=${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }" >> $GITHUB_OUTPUT
+          echo "sha_short=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_OUTPUT
+          echo "image_name=${{ vars.DOCKER_REGISTRY_URL }}/${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
+
+      # 修改配置文件
+      - name: Modify config
+        run: |
+          echo "${{ secrets.TOML_CONFIG }}" > config.toml
+
+      # 登录到私有 Docker 镜像仓库
+      - name: Login to Docker Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          registry: ${{ vars.DOCKER_REGISTRY_URL }}
+
+      # 构建 Docker 镜像，并将其推送到私有镜像仓库
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}
+
+      # 将 docker-compose 文件传输到远程服务器
+      - name: Deploy docker-compose file to Remote Server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/${{ steps.vars.outputs.name }}
+            echo "${{ vars.DOCKER_COMPOSE }}" > docker-compose.yml
+
+      # 远程服务器拉取镜像
+      - name: Pull Image on Remote Server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}
+
+      # 清理远程服务器环境
+      - name: Clean up the environment on Remote Server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            SERVICE_NAME=${{ steps.vars.outputs.repository }}
+            # 清理环境
+            docker stop $SERVICE_NAME
+            docker rm $SERVICE_NAME
+            # 清除其他同名镜像(排除本次构建的镜像)
+            docker images --format '{{.Repository}}:{{.Tag}}' | grep ^${{ steps.vars.outputs.image_name }}: | grep -v "${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}" | xargs -r docker rmi
+
+      # 在远程服务器上使用 Docker Compose 运行服务
+      - name: Run Docker Compose on Remote Server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/${{ steps.vars.outputs.name }}
+            REPOSITORY=${{ steps.vars.outputs.image_name }} VERSION=${{ steps.vars.outputs.sha_short }} docker-compose up -d
+
+      - name: Clean Image
+        run: |
+          docker rmi ${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}

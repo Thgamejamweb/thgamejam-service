@@ -1,5 +1,6 @@
 import glob
 import importlib
+import os
 
 import uvicorn
 
@@ -19,10 +20,15 @@ if __name__ == '__main__':
     settings.add_config_reader(env_config.read_env_config())
     settings.read()
 
-    app.instance = App(settings.get())
+    conf = settings.get()
+    app.instance = App(conf)
 
     # services注入
     for file in service_file:
-        module_name = file[:-3].replace('\\', '.')
+        module_name = file[:-3].replace(os.sep, '.')
         module = importlib.import_module(module_name)
-    uvicorn.run(app.instance.http)
+
+    uvicorn.run(app=app.instance.http,
+                host=conf.server.host,
+                port=conf.server.port,
+                )

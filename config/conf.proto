@@ -1,6 +1,11 @@
 syntax = "proto3";
 package config.conf;
 
+message Server {
+  string host = 1;
+  uint32 port = 2;
+}
+
 message Database {
   string source = 1;
   uint32 pool_timeout = 2;
@@ -11,7 +16,7 @@ message Database {
 
 message JWT {
   string secret_key = 1;
-  int32 expiration_time = 2;
+  uint32 expiration_time = 2;
 }
 
 message ObjectStorage {
@@ -21,7 +26,8 @@ message ObjectStorage {
 }
 
 message Bootstrap {
-  Database database = 1;
-  JWT jwt = 2;
-  ObjectStorage oss = 3;
+  Server server = 1;
+  Database database = 2;
+  JWT jwt = 3;
+  ObjectStorage oss = 4;
 }
