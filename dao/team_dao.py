@@ -73,6 +73,6 @@ def user_join_team(user_info: TeamUserEntity, session: Session):
 def delete_user_in_team_info(user_id: int, team_id: int, session: Session):
     t = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.user_id == user_id,
                                              TeamUserEntity.is_admin == False,
-                                             TeamUserEntity.deleted == False)
+                                             TeamUserEntity.deleted == False).one()
     session.delete(t)
     session.commit()
