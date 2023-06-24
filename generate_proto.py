@@ -42,12 +42,12 @@ def generate_proto_config():
         (
             '',
             '--proto_path=.',
-            '--proto_path=./proto/third_party',
             '--python_out=.',
             '--pyi_out=.',
             './config/conf.proto'
         )
     )
+    # python -m grpc.tools.protoc --proto_path=. --python_out=. --pyi_out=. conf.proto
 
 
 def main(command: str, arguments):
