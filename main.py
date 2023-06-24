@@ -1,5 +1,6 @@
 import glob
 import importlib
+import os
 
 import uvicorn
 
@@ -24,7 +25,7 @@ if __name__ == '__main__':
 
     # services注入
     for file in service_file:
-        module_name = file[:-3].replace('\\', '.')
+        module_name = file[:-3].replace(os.sep, '.')
         module = importlib.import_module(module_name)
 
     uvicorn.run(app=app.instance.http,
