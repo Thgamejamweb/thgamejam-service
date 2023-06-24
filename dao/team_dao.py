@@ -6,7 +6,7 @@ from modles.team_user_entity import TeamUserEntity
 from modles.user_entity import UserEntity
 
 
-def get_team_number_by_team_id(team_id: int, session: Session) -> list[UserEntity]:
+def get_team_member_by_team_id(team_id: int, session: Session) -> list[UserEntity]:
     session.query(TeamEntity).filter(TeamEntity.id == team_id, TeamEntity.deleted == False).one()
 
     users = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.is_join == True,
@@ -43,8 +43,12 @@ def change_team_name(team_id: int, team_name: str, session: Session):
 
 
 def verify_user_id_team_admin(user_id: int, team_id: int, session: Session) -> bool:
-    session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.user_id == user_id,
-                                         TeamUserEntity.is_admin == True, TeamUserEntity.deleted == False).one()
+    team_info = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id,
+                                                     TeamUserEntity.user_id == user_id,
+                                                     TeamUserEntity.is_admin == True,
+                                                     TeamUserEntity.deleted == False).first()
+    if team_info is None:
+        return False
     return True
 
 
