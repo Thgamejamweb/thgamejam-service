@@ -36,15 +36,15 @@ jobs:
       - name: Set outputs
         id: vars
         run: |
-          echo "repository=${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
-          echo "name=${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
-          echo "sha_short=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_OUTPUT
-          echo "image_name=${{ vars.DOCKER_REGISTRY_URL }}/${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
+          echo 'repository=${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
+          echo 'name=${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
+          echo 'sha_short=`echo ${{ github.sha }} | cut -c1-8`' >> $GITHUB_OUTPUT
+          echo 'image_name=${{ vars.DOCKER_REGISTRY_URL }}/${{ vars.NAMESPACE }}/${{ vars.REPOSITORY }}' >> $GITHUB_OUTPUT
 
       # 修改配置文件
       - name: Modify config
         run: |
-          echo "${{ secrets.TOML_CONFIG }}" > config.toml
+          echo '${{ secrets.TOML_CONFIG }}' > config.toml
 
       # 登录到私有 Docker 镜像仓库
       - name: Login to Docker Registry
@@ -73,7 +73,7 @@ jobs:
           script: |
             mkdir -p ~/${{ steps.vars.outputs.name }}
             cd ~/${{ steps.vars.outputs.name }}
-            echo "${{ vars.DOCKER_COMPOSE }}" > docker-compose.yml
+            echo '${{ vars.DOCKER_COMPOSE }}' > docker-compose.yml
 
       # 远程服务器拉取镜像
       - name: Pull Image on Remote Server
@@ -98,7 +98,7 @@ jobs:
             docker stop $SERVICE_NAME
             docker rm $SERVICE_NAME
             # 清除其他同名镜像(排除本次构建的镜像)
-            docker images --format '{{.Repository}}:{{.Tag}}' | grep ^${{ steps.vars.outputs.image_name }}: | grep -v "${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}" | xargs -r docker rmi
+            docker images --format '{{.Repository}}:{{.Tag}}' | grep ^${{ steps.vars.outputs.image_name }}: | grep -v '${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.sha_short }}' | xargs -r docker rmi
 
       # 在远程服务器上使用 Docker Compose 运行服务
       - name: Run Docker Compose on Remote Server
