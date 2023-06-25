@@ -2,12 +2,14 @@ from fastapi import HTTPException
 from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.team.team_pb2 import GetTeamMemberListRequest, GetTeamMemberListReply, SetTeamMemberRequest, \
-    CreateTeamRequest, CreateTeamReply, DeleteTeamRequest, ChangeTeamNameRequest, UserInfo
+    CreateTeamRequest, CreateTeamReply, DeleteTeamRequest, ChangeTeamNameRequest, UserInfo, RejectJoinTeamRequest, \
+    GetUserJoinAllTeamListRequest, GetUserAllTeamListReply, TeamInfo
 from api.thgamejam.team.team_pb2_http import TeamServicer, register_team_http_server
 from core.app import instance
 from core.router_register import parse_request, parse_reply, register_fastapi_route, request_context
 from dao.team_dao import get_team_member_by_team_id, create_team, verify_user_id_team_admin, change_team_name, \
-    add_user_into_team, get_user_add_team_info, user_join_team, delete_user_in_team_info, delete_team
+    add_user_into_team, get_user_add_team_info, user_join_team, delete_user_in_team_info, delete_team, delete_team_info, \
+    get_join_team_list_by_userid, get_all_not_join_team_list_by_userid
 from dao.user_dao import get_userinfo_by_id
 
 
@@ -80,6 +82,34 @@ class TeamServiceImpl(TeamServicer):
         change_team_name(request.team_id, request.new_name, session)
 
         return Empty()
+
+    def RejectJoinTeam(self, request: RejectJoinTeamRequest) -> Empty:
+        session = instance.database.get_db_session()
+        delete_team_info(request.team_id, request_context.get().userid, session)
+
+        return Empty()
+
+    def GetUserJoinAllTeamList(self, request: GetUserJoinAllTeamListRequest) -> GetUserAllTeamListReply:
+        session = instance.database.get_db_session()
+
+        team_info_list = get_join_team_list_by_userid(request.user_id, session)
+
+        team_list = []
+        for team in team_info_list:
+            team_list.append(TeamInfo(team_id=team.id, team_name=team.name))
+
+        return GetUserAllTeamListReply(list=team_list)
+
+    def GetAllRequestTeamList(self, request: Empty) -> GetUserAllTeamListReply:
+        session = instance.database.get_db_session()
+
+        team_info_list = get_all_not_join_team_list_by_userid(request_context.get().userid, session)
+
+        team_list = []
+        for team in team_info_list:
+            team_list.append(TeamInfo(team_id=team.id, team_name=team.name))
+
+        return GetUserAllTeamListReply(list=team_list)
 
 
 register_team_http_server(register_fastapi_route, TeamServiceImpl(), parse_request, parse_reply)

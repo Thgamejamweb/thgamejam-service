@@ -86,3 +86,34 @@ def delete_user_in_team_info(user_id: int, team_id: int, session: Session):
 def delete_team(team_id: int, session: Session):
     session.query(TeamEntity).filter(TeamEntity.id == team_id).delete()
     session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id).delete()
+    session.commit()
+
+
+def delete_team_info(team_id: int, user_id: int, session: Session):
+    session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id,
+                                         TeamUserEntity.user_id == user_id,
+                                         TeamUserEntity.is_admin == False,
+                                         TeamUserEntity.is_join == False,
+                                         TeamUserEntity.deleted == False).delete()
+    session.commit()
+
+
+def get_join_team_list_by_userid(user_id: int, session: Session) -> list[TeamEntity]:
+    team_into_list = session.query(TeamUserEntity).filter(TeamUserEntity.user_id == user_id,
+                                                          TeamUserEntity.is_join == True,
+                                                          TeamUserEntity.deleted == False).all()
+    team_list = []
+    for team in team_into_list:
+        team_list.append(session.query(TeamEntity).filter(TeamEntity.id == team.team_id).one())
+
+    return team_list
+
+
+def get_all_not_join_team_list_by_userid(user_id: int, session: Session) -> list[TeamEntity]:
+    team_into_list = session.query(TeamUserEntity).filter(TeamUserEntity.user_id == user_id,
+                                                          TeamUserEntity.is_join == False,
+                                                          TeamUserEntity.deleted == False).all()
+    team_list = []
+    for team in team_into_list:
+        team_list.append(session.query(TeamEntity).filter(TeamEntity.id == team.team_id).one())
+    return team_list
