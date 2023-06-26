@@ -13,4 +13,8 @@ class WorksEntity(BaseModel, base):
     name = Column(String, nullable=False, comment='作品名')
     team_id = Column(BigInteger, nullable=False, comment='团队id')
     header_imageURL = Column(String, nullable=False, comment='头图url')
-    is_join = Column(Boolean, nullable=False, comment='是否加入')
+
+    def __init__(self, team_id: int, header_imageURl: str = None, name: str = None, ):
+        self.name = name
+        self.team_id = team_id
+        self.header_imageURL = header_imageURl
