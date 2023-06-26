@@ -2,20 +2,19 @@ from base64 import b64decode, b64encode
 
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 
 def decrypt_data(data: str, private_key: str) -> str:
     encrypted_data = b64decode(data)
 
     # 创建RSA解密器
-    key = RSA.import_key(private_key)
-    cipher = PKCS1_OAEP.new(key)
-
-    # 使用解密器解密数据
-    decrypted_data = cipher.decrypt(encrypted_data)
+    key = serialization.load_pem_private_key(private_key.encode(), password=None)
+    cipher = key.decrypt(encrypted_data, padding.PKCS1v15())
 
     # 将解密后的字节流转换为字符串并返回
-    return decrypted_data.decode('utf-8')
+    return cipher.decode('utf-8')
 
 
 def encrypt_data(data: str, public_key: str) -> str:
