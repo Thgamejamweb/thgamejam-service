@@ -117,3 +117,7 @@ def get_all_not_join_team_list_by_userid(user_id: int, session: Session) -> list
     for team in team_into_list:
         team_list.append(session.query(TeamEntity).filter(TeamEntity.id == team.team_id).one())
     return team_list
+
+
+def get_team_name_by_team_id(team_id: int, session: Session) -> TeamEntity:
+    return session.query(TeamEntity).filter(TeamEntity.id == team_id).first()
