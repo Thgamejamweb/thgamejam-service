@@ -113,8 +113,4 @@ class WorksServiceImpl(WorksServicer):
         return Empty()
 
 
-def handle_img_url_list(url_list: iter[string]) -> string:
-    return ",".join(url_list)
-
-
 register_works_http_server(register_fastapi_route, WorksServiceImpl(), parse_request, parse_reply)

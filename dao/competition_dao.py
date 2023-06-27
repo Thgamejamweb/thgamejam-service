@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from modles.competition_entity import CompetitionEntity
@@ -63,3 +66,24 @@ def add_team_works_to_competition(competition_id: int, team_id: int, works_id: i
     is_join_competition.works_id = works_id
     session.merge(is_join_competition)
     session.commit()
+
+
+def get_signup_competition_list(session: Session) -> list[CompetitionEntity]:
+    current_time = datetime.now()
+    competition_list = session.query(CompetitionEntity).filter(and_(CompetitionEntity.signup_start_date <= current_time,
+                                                                    CompetitionEntity.signup_end_date >= current_time)).all()
+    return competition_list
+
+
+def get_start_competition_list(session: Session) -> list[CompetitionEntity]:
+    current_time = datetime.now()
+    competition_list = session.query(CompetitionEntity).filter(and_(CompetitionEntity.start_date <= current_time,
+                                                                    CompetitionEntity.end_date >= current_time)).all()
+    return competition_list
+
+
+def get_score_competition_list(session: Session) -> list[CompetitionEntity]:
+    current_time = datetime.now()
+    competition_list = session.query(CompetitionEntity).filter(and_(CompetitionEntity.score_start_date <= current_time,
+                                                                    CompetitionEntity.score_end_date >= current_time)).all()
+    return competition_list

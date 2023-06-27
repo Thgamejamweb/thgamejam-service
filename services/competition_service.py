@@ -8,7 +8,8 @@ from api.thgamejam.competition.competition_pb2_http import CompetitionServicer, 
 from core.app import instance
 from core.router_register import register_fastapi_route, parse_reply, parse_request, request_context
 from dao.competition_dao import get_competition_list_by_userid, get_competition_info_by_team_id, \
-    create_competition_info, create_competition, team_join_competition, add_team_works_to_competition
+    create_competition_info, create_competition, team_join_competition, add_team_works_to_competition, \
+    get_signup_competition_list, get_start_competition_list, get_score_competition_list
 from dao.team_dao import verify_user_id_team_admin
 from dao.user_dao import get_userinfo_by_id
 from modles.competition_entity import CompetitionEntity
@@ -17,13 +18,44 @@ from modles.competition_entity import CompetitionEntity
 class CompetitionServiceImpl(CompetitionServicer):
 
     def GetSignupCompetitionList(self, request: Empty) -> CompetitionListReply:
-        pass
+        session = instance.database.get_db_session()
+        competition_info_list = get_signup_competition_list(session)
+
+        competitions = []
+        for competition in competition_info_list:
+            user = get_userinfo_by_id(competition.staff_id, session)
+            competitions.append(CompetitionInfo(id=competition.id, name=competition.name,
+                                                staff_name=user.name,
+                                                description=competition.description,
+                                                header_imageURL=competition.header_imageURL))
+
+        return CompetitionListReply(list=competitions)
 
     def GetStartCompetitionList(self, request: Empty) -> CompetitionListReply:
-        pass
+        session = instance.database.get_db_session()
+        competition_info_list = get_start_competition_list(session)
+
+        competitions = []
+        for competition in competition_info_list:
+            user = get_userinfo_by_id(competition.staff_id, session)
+            competitions.append(CompetitionInfo(id=competition.id, name=competition.name,
+                                                staff_name=user.name,
+                                                description=competition.description,
+                                                header_imageURL=competition.header_imageURL))
+
+        return CompetitionListReply(list=competitions)
 
     def GetEndCompetitionList(self, request: Empty) -> CompetitionListReply:
-        pass
+        session = instance.database.get_db_session()
+        competition_info_list = get_score_competition_list(session)
+
+        competitions = []
+        for competition in competition_info_list:
+            user = get_userinfo_by_id(competition.staff_id, session)
+            competitions.append(CompetitionInfo(id=competition.id, name=competition.name,
+                                                staff_name=user.name,
+                                                description=competition.description,
+                                                header_imageURL=competition.header_imageURL))
 
     def GetUserJoinCompetitionList(self, request: GetUserJoinCompetitionListRequest) -> CompetitionListReply:
         session = instance.database.get_db_session()
@@ -31,8 +63,9 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         competitions = {}
         for competition in competition_info_list:
+            user = get_userinfo_by_id(competition.staff_id, session)
             competitions[competition.id] = CompetitionInfo(id=competition.id, name=competition.name,
-                                                           staff_id=competition.staff_id,
+                                                           staff_name=user.name,
                                                            description=competition.description,
                                                            header_imageURL=competition.header_imageURL)
 
@@ -44,8 +77,9 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         competitions = []
         for competition in competition_info_list:
+            user = get_userinfo_by_id(competition.staff_id, session)
             competitions.append(CompetitionInfo(id=competition.id, name=competition.name,
-                                                staff_id=competition.staff_id,
+                                                staff_name=user.name,
                                                 description=competition.description,
                                                 header_imageURL=competition.header_imageURL))
 
