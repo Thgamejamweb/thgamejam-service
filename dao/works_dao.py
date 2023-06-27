@@ -6,9 +6,8 @@ from modles.team_entity import TeamEntity
 from modles.works_info_entity import WorksInfoEntity
 
 
-
 def create_works(name: str, header_imageURL: str, team_id: int, session: Session):
-    works = session.query(WorksEntity).filter(WorksEntity.name == name).one()
+    works = session.query(WorksEntity).filter(WorksEntity.name == name).first()
     if works is None:
         work = WorksEntity(team_id=team_id, header_imageURl=header_imageURL, name=name)
         session.add(work)
@@ -17,8 +16,8 @@ def create_works(name: str, header_imageURL: str, team_id: int, session: Session
 
 
 def create_works_info(workInfoEnitiy: WorksInfoEntity, session: Session):
-    # TODO 校验作品名是否重复
     workinfo = WorksInfoEntity(team_id=workInfoEnitiy.team_id,
+                               works_id=workInfoEnitiy.works_id,
                                image_url_list=workInfoEnitiy.image_url_list,
                                content=workInfoEnitiy.content,
                                file_id=workInfoEnitiy.file_id)
@@ -27,10 +26,6 @@ def create_works_info(workInfoEnitiy: WorksInfoEntity, session: Session):
 
 
 def get_works_by_name(name: str, session: Session) -> WorksEntity | None:
-    """
-
-    :rtype: object
-    """
     return session.query(WorksEntity).filter(WorksEntity.name == name).first()
 
 
@@ -39,14 +34,12 @@ def get_works_by_id(work_id: int, session: Session) -> WorksEntity | None:
 
 
 def get_works_list_by_term_name(term_name: str, session: Session) -> list[WorksEntity] | None:
-    team = session.query(TeamEntity).filter(TeamEntity.name == term_name).all()
+    team = session.query(TeamEntity).filter(TeamEntity.name == term_name).one()
+    return session.query(WorksEntity).filter(WorksEntity.team_id == team.id).all()
 
 
-def get_works_list_by_term_id(term_id: int, session: Session) -> list[WorksEntity] | None:
-    team = session.query(WorksEntity).filter(WorksEntity.team_id == term_id).first()
-    if team is not None:
-        return session.query(WorksEntity).filter(WorksEntity.team_id == team.id).all()
-    return None
+def get_works_list_by_term_id(team_id: int, session: Session) -> list[WorksEntity] | None:
+    return session.query(WorksEntity).filter(WorksEntity.team_id == team_id).all()
 
 
 def get_works_info_by_id(works_id: int, session: Session) -> WorksInfoEntity | None:
