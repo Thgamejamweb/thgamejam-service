@@ -14,7 +14,7 @@ class UserEntity(BaseModel, base):
     email = Column(String(50), nullable=True, comment='邮箱')
     password = Column(String(50), nullable=False, comment='密码')
     description = Column(String(100), nullable=True, comment='用户描述')
-    avatar_image = Column(String(64), nullable=True, comment='用户头像url')
+    avatar_image = Column(String(500), nullable=True, comment='用户头像url')
     is_staff = Column(Boolean, default=False, nullable=False, comment='是否是主办方')
     public_key = Column(String(4096))
     private_key = Column(String(4096))
