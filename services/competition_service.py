@@ -1,6 +1,8 @@
 from fastapi import HTTPException
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
 
+from api.thgamejam.competition import competition_pb2 as api_dot_thgamejam_dot_competition_dot_competition__pb2
 from api.thgamejam.competition.competition_pb2 import CompetitionListReply, GetUserJoinCompetitionListRequest, \
     GetTeamJoinCompetitionListRequest, CreateCompetitionRequest, CreateCompetitionReply, JoinCompetitionRequest, \
     AddWorksRequest, CompetitionInfo
@@ -56,6 +58,8 @@ class CompetitionServiceImpl(CompetitionServicer):
                                                 staff_name=user.name,
                                                 description=competition.description,
                                                 header_imageURL=competition.header_imageURL))
+
+        return CompetitionListReply(list=competitions)
 
     def GetUserJoinCompetitionList(self, request: GetUserJoinCompetitionListRequest) -> CompetitionListReply:
         session = instance.database.get_db_session()
@@ -124,13 +128,15 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return Empty()
 
-    def AddCompetition(self, request: AddWorksRequest) -> Empty:
+    def AddCompetitionWorks(self, request: AddWorksRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
             raise HTTPException(status_code=403, detail="Forbidden")
 
-        add_team_works_to_competition(request.competition_id, request.works_id, request.works_id, session)
+        is_join = add_team_works_to_competition(request.competition_id, request.works_id, request.works_id, session)
+        if is_join is False:
+            raise HTTPException(status_code=403, detail="join error")
 
         return Empty()
 

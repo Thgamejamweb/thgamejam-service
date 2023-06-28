@@ -66,6 +66,7 @@ def add_team_works_to_competition(competition_id: int, team_id: int, works_id: i
     is_join_competition.works_id = works_id
     session.merge(is_join_competition)
     session.commit()
+    return True
 
 
 def get_signup_competition_list(session: Session) -> list[CompetitionEntity]:
