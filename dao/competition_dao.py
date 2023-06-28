@@ -88,3 +88,9 @@ def get_score_competition_list(session: Session) -> list[CompetitionEntity]:
     competition_list = session.query(CompetitionEntity).filter(and_(CompetitionEntity.score_start_date <= current_time,
                                                                     CompetitionEntity.score_end_date >= current_time)).all()
     return competition_list
+
+
+def get_all_upload_works_by_competitionId(competition_id: int, session: Session) -> list[TeamCompetitionEntity]:
+    works_ids = session.query(TeamCompetitionEntity).filter(TeamCompetitionEntity.competition_id == competition_id,
+                                                            TeamCompetitionEntity.works_id != None).all()
+    return works_ids
