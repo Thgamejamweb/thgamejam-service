@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import HTTPException
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
@@ -109,9 +111,20 @@ class CompetitionServiceImpl(CompetitionServicer):
         if user.is_staff is False:
             raise HTTPException(status_code=403, detail="Forbidden")
 
-        # TODO 时间转换
         competition = create_competition(CompetitionEntity(name=request.name, description=request.description,
                                                            header_imageURL=request.header_imageURL,
+                                                           signup_start_date=datetime.strptime(
+                                                               request.signup_start_date, '%Y-%m-%d %H:%M:%S'),
+                                                           signup_end_date=datetime.strptime(request.signup_end_date,
+                                                                                             '%Y-%m-%d %H:%M:%S'),
+                                                           start_date=datetime.strptime(request.start_date,
+                                                                                        '%Y-%m-%d %H:%M:%S'),
+                                                           end_date=datetime.strptime(request.end_date,
+                                                                                      '%Y-%m-%d %H:%M:%S'),
+                                                           score_start_date=datetime.strptime(request.score_start_date,
+                                                                                              '%Y-%m-%d %H:%M:%S'),
+                                                           score_end_date=datetime.strptime(request.score_end_date,
+                                                                                            '%Y-%m-%d %H:%M:%S'),
                                                            staff_id=request_context.get().userid), session)
 
         create_competition_info(competition.id, request.content, session)
