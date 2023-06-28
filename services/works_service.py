@@ -1,10 +1,12 @@
+import random
 import string
-from queue import Empty
 
 from fastapi import HTTPException
+from google.protobuf.empty_pb2 import Empty
+
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
-    GetWorksListByTeamIdReply
+    GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
 from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
@@ -13,6 +15,33 @@ from core.router_register import parse_request, parse_reply, register_fastapi_ro
 
 
 class WorksServiceImpl(WorksServicer):
+
+    def GetRandom4DateRequest(self, request: Empty) -> GetRandom4DateReply:
+        print("aaa")
+        session = instance.database.get_db_session()
+        work_list = get_random_four_date(session)
+        size = len(work_list)
+        print(size)
+        works = []
+        for i in range(4):
+            kk = work_list[i]
+            team = get_team_name_by_team_id(kk.team_id, session)
+
+            works.append(WorksInfo(id=kk.id, team_id=kk.team_id, work_name=kk.name, team_name=team.name,
+                                   header_imageURL=kk.header_imageURL))
+        return GetRandom4DateReply(works_list=works)
+
+    def getWorksByReverseIdRequest(self, request: Empty) -> getWorksByReverseIdReply:
+        session = instance.database.get_db_session()
+        work_list: list[WorksEntity] = get_reserve_eight_date(session)
+        size = len(work_list)
+        works = []
+        for i in range(8):
+            kk = work_list[i]
+            team = get_team_name_by_team_id(kk.team_id, session)
+            works.append(WorksInfo(id=kk.id, team_id=kk.team_id, work_name=kk.name, team_name=team.name,
+                                   header_imageURL=kk.header_imageURL))
+        return getWorksByReverseIdReply(works_list=works)
 
     def GetWorksListByTermId(self, request: GetWorksByIdRequest) -> GetWorksListByTeamIdReply:
         session = instance.database.get_db_session()
@@ -42,7 +71,8 @@ class WorksServiceImpl(WorksServicer):
         session = instance.database.get_db_session()
         works = get_works_by_id(request.works_id, session)
         team = get_team_name_by_team_id(works.team_id, session)
-        return WorksInfo(works.id, works.team_id, works.name, team.name, works.header_imageURL)
+        return WorksInfo(work_name=works.name, team_id=team.id, team_name=team.name,
+                         header_imageURL=works.header_imageURL)
 
     def GetWorksByName(self, request: GetWorksByNameRequest) -> WorksInfo | None:
         session = instance.database.get_db_session()

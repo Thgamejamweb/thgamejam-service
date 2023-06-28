@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
@@ -60,3 +61,11 @@ def update_work(work_entity: WorksEntity, session: Session):
 def update_work_info(work_Info_entity: WorksInfoEntity, session: Session):
     session.merge(work_Info_entity)
     session.commit()
+
+
+def get_random_four_date(session: Session):
+    return session.query(WorksEntity).order_by(func.random()).limit(4).all()
+
+
+def get_reserve_eight_date(session: Session):
+    return session.query(WorksEntity).order_by(getattr(WorksEntity, "id").desc()).limit(8).all()
