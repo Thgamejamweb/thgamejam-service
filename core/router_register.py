@@ -8,7 +8,7 @@ from typing import Callable as _Callable, Any as _Any, Dict as _Dict
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.message import Message
 from jwt import InvalidSignatureError, ExpiredSignatureError
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 
 from config.conf import settings
 from core.app import instance
@@ -50,7 +50,9 @@ def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str
 # 拦截器
 def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[Request], _Any]:
     async def endpoint(request: Request) -> _Any:
-        token_check_interceptor(request)
+        check_token = token_check_interceptor(request)
+        if check_token is False:
+            return RedirectResponse(url="/account/login")
 
         body = await request.body()
         result = handler(request.path_params, body)
@@ -61,22 +63,23 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
     return endpoint
 
 
-def token_check_interceptor(request: Request):
+def token_check_interceptor(request: Request) ->bool:
     if any(request.url.path.startswith(router) for router in token_check_router):
         token = request.cookies.get("token")
 
         if token is None:
-            raise HTTPException(status_code=401, detail="Unauthorized Token")
+            return False
         else:
             try:
                 user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
                 request_context.set(UserContext(userid=user_ctx['userid']))
 
             except InvalidSignatureError:
-                raise HTTPException(status_code=401, detail="Signature verification failed")
+                return False
 
             except ExpiredSignatureError:
-                raise HTTPException(status_code=401, detail="Signature has expired")
+                return False
+    return True
 
 
 # token注入
