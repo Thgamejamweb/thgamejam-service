@@ -52,7 +52,7 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
     async def endpoint(request: Request) -> _Any:
         check_token = token_check_interceptor(request)
         if check_token is False:
-            return RedirectResponse(url="/account/login")
+            raise HTTPException(status_code=401)
 
         body = await request.body()
         result = handler(request.path_params, body)
