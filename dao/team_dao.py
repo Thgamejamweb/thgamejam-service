@@ -52,13 +52,16 @@ def verify_user_id_team_admin(user_id: int, team_id: int, session: Session) -> b
     return True
 
 
-def add_user_into_team(user_id: int, team_id: int, session: Session):
+def add_user_into_team(user_id: int, team_id: int, session: Session) -> bool:
     user = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.user_id == user_id,
                                                 TeamUserEntity.deleted == False).first()
 
     if user is None:
         session.add(TeamUserEntity(team_id=team_id, user_id=user_id, is_join=False, is_admin=False))
         session.commit()
+        return True
+
+    return False
 
 
 def get_user_add_team_info(user_id: int, team_id: int, session: Session) -> TeamUserEntity | None:
