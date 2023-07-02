@@ -68,7 +68,7 @@ class UserServiceImpl(UserServicer):
             raise HTTPException(status_code=404, detail="UserInfo not find")
 
         if user.password != request.old_password:
-            raise HTTPException(status_code=401, detail="Password error")
+            raise HTTPException(status_code=404, detail="Password error")
 
         user.password = request.new_password
         update_userinfo(user, session)
