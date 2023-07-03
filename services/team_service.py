@@ -43,7 +43,10 @@ class TeamServiceImpl(TeamServicer):
         if user is None:
             raise HTTPException(status_code=404, detail="UserInfo not find")
 
-        add_user_into_team(request.user_id, request.team_id, session)
+        is_join = add_user_into_team(request.user_id, request.team_id, session)
+        if is_join is False:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
         return Empty()
 
     def DeleteTeamMember(self, request: SetTeamMemberRequest) -> Empty:

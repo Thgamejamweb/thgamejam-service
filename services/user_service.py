@@ -4,7 +4,7 @@ from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
     UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserIdInfoReply, \
-    ChangeDescriptionRequest, GetUserIdByNameRequest
+    ChangeDescriptionRequest, GetUserIdByNameRequest, GetUserInfoByIdRequest, UserInfoReply
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
@@ -68,7 +68,7 @@ class UserServiceImpl(UserServicer):
             raise HTTPException(status_code=404, detail="UserInfo not find")
 
         if user.password != request.old_password:
-            raise HTTPException(status_code=401, detail="Password error")
+            raise HTTPException(status_code=404, detail="Password error")
 
         user.password = request.new_password
         update_userinfo(user, session)
@@ -92,6 +92,25 @@ class UserServiceImpl(UserServicer):
         user = get_userinfo_by_username(request.name, session)
 
         return GetUserIdInfoReply(id=user.id)
+
+    def GetUserInfoById(self, request: GetUserInfoByIdRequest) -> UserInfoReply:
+        session = instance.database.get_db_session()
+        user = get_userinfo_by_id(request.user_id, session)
+
+        return UserInfoReply(id=user.id, name=user.name, description=user.description, avatar_image=user.avatar_image,
+                             is_staff=user.is_staff)
+
+    def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
+        session = instance.database.get_db_session()
+        user = UserEntity()
+        user.id = request_context.get().userid
+        user.name = request.name
+        user.description = request.description
+        user.avatar_image = request.avatar_image
+
+        update_userinfo(user, session)
+
+        return Empty()
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
