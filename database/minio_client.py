@@ -42,13 +42,14 @@ def listen_minio_events(minio_client: MinioClient, database: Database):
                     session = database.get_db_session()
                     file = session.query(FileEntity).filter(FileEntity.deleted is False,
                                                             FileEntity.e_tag == e_tag).first()
-                    if file is None:
-                        file = FileEntity()
-                        file.file_name = file_name
-                        file.e_tag = e_tag
 
-                        session.add(file)
+                    if file is None:
+                        file_info = FileEntity()
+                        file_info.file_name = file_name
+                        file_info.e_tag = e_tag
+                        file_info.is_Upload = True
+
+                        session.add(file_info)
                         session.commit()
-                        session.close()
 
     return minio_event
