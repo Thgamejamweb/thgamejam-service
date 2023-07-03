@@ -100,5 +100,17 @@ class UserServiceImpl(UserServicer):
         return UserInfoReply(id=user.id, name=user.name, description=user.description, avatar_image=user.avatar_image,
                              is_staff=user.is_staff)
 
+    def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
+        session = instance.database.get_db_session()
+        user = UserEntity()
+        user.id = request_context.get().userid
+        user.name = request.name
+        user.description = request.description
+        user.avatar_image = request.avatar_image
+
+        update_userinfo(user, session)
+
+        return Empty()
+
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)

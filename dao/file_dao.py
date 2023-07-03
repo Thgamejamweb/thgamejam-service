@@ -10,3 +10,8 @@ def verify_file_eTag(eTag: str, session: Session) -> FileEntity | None:
 def create_fileinfo(file: FileEntity, session: Session):
     session.add(file)
     session.commit()
+
+
+def update_file_info(file: FileEntity, session: Session):
+    session.merge(file)
+    session.commit()
