@@ -4,9 +4,11 @@ import string
 from fastapi import HTTPException
 from google.protobuf.empty_pb2 import Empty
 
+from api.thgamejam.works import works_pb2 as api_dot_thgamejam_dot_works_dot_works__pb2
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
-    GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest
+    GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest, \
+    GetWorksByTeamIdListRequest, GetWorksListByTeamIdListReply
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
 from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
@@ -16,8 +18,21 @@ from core.router_register import parse_request, parse_reply, register_fastapi_ro
 
 class WorksServiceImpl(WorksServicer):
 
+    def GetWorksListByTeamIdList(self, request: GetWorksByTeamIdListRequest) -> GetWorksListByTeamIdListReply:
+        session = instance.database.get_db_session()
+        lists = request.team_id_list
+        ids = []
+        for id in lists:
+            ids.append(id)
+        works = get_work_list_by_team_id_list(ids, session)
+        works_lists = []
+        for work in works:
+            team = get_team_name_by_team_id(work.team_id, session)
+            works_lists.append(WorksInfo(id=work.id, team_id=work.team_id, work_name=work.name, team_name=team.name,
+                                         header_imageURL=work.header_imageURL))
+        return GetWorksListByTeamIdListReply(works_list=works_lists)
+
     def GetRandom4DateRequest(self, request: Empty) -> GetRandom4DateReply:
-        print("aaa")
         session = instance.database.get_db_session()
         work_list = get_random_four_date(session)
         size = len(work_list)

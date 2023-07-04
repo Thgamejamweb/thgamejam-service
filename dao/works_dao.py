@@ -69,3 +69,7 @@ def get_random_four_date(session: Session):
 
 def get_reserve_eight_date(session: Session):
     return session.query(WorksEntity).order_by(getattr(WorksEntity, "id").desc()).limit(8).all()
+
+
+def get_work_list_by_team_id_list(ids: list[int], session: Session) -> list[WorksEntity]:
+    return session.query(WorksEntity).filter(WorksEntity.id.in_(ids)).all()
