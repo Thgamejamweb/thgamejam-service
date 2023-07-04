@@ -12,17 +12,18 @@ def create_works(name: str, header_imageURL: str, team_id: int, session: Session
     if works is None:
         work = WorksEntity(team_id=team_id, header_imageURl=header_imageURL, name=name)
         session.add(work)
+        session.commit()
         return work
     return None
 
 
-def create_works_info(workInfoEnitiy: WorksInfoEntity, session: Session):
-    workinfo = WorksInfoEntity(team_id=workInfoEnitiy.team_id,
-                               works_id=workInfoEnitiy.works_id,
-                               image_url_list=workInfoEnitiy.image_url_list,
-                               content=workInfoEnitiy.content,
-                               file_id=workInfoEnitiy.file_id)
-    session.add(workinfo)
+def create_works_info(workInfoEntity: WorksInfoEntity, session: Session):
+    work_info = WorksInfoEntity(team_id=workInfoEntity.team_id,
+                                works_id=workInfoEntity.works_id,
+                                image_url_list=workInfoEntity.image_url_list,
+                                content=workInfoEntity.content,
+                                file_id=workInfoEntity.file_id)
+    session.add(work_info)
     session.commit()
 
 
