@@ -102,11 +102,14 @@ class UserServiceImpl(UserServicer):
 
     def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
         session = instance.database.get_db_session()
-        user = UserEntity()
-        user.id = request_context.get().userid
-        user.name = request.name
-        user.description = request.description
-        user.avatar_image = request.avatar_image
+        user = get_userinfo_by_id(request_context.get().userid, session)
+
+        if request.name is not None:
+            user.name = request.name
+        if request.description is not None:
+            user.description = request.description
+        if request.avatar_image is not None:
+            user.avatar_image = request.avatar_image
 
         update_userinfo(user, session)
 

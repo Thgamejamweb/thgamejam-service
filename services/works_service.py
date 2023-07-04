@@ -6,7 +6,7 @@ from google.protobuf.empty_pb2 import Empty
 
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
-    GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply
+    GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
 from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
@@ -31,7 +31,7 @@ class WorksServiceImpl(WorksServicer):
                                    header_imageURL=kk.header_imageURL))
         return GetRandom4DateReply(works_list=works)
 
-    def getWorksByReverseIdRequest(self, request: Empty) -> getWorksByReverseIdReply:
+    def GetWorksByReverseIdRequest(self, request: Empty) -> getWorksByReverseIdReply:
         session = instance.database.get_db_session()
         work_list: list[WorksEntity] = get_reserve_eight_date(session)
         size = len(work_list)
@@ -43,7 +43,7 @@ class WorksServiceImpl(WorksServicer):
                                    header_imageURL=kk.header_imageURL))
         return getWorksByReverseIdReply(works_list=works)
 
-    def GetWorksListByTermId(self, request: GetWorksByIdRequest) -> GetWorksListByTeamIdReply:
+    def GetWorksListByTeamId(self, request: GetWorksByIdRequest) -> GetWorksListByTeamIdReply:
         session = instance.database.get_db_session()
         works = get_works_list_by_term_id(request.team_id, session)
         team = get_team_name_by_team_id(request.team_id, session)
@@ -83,7 +83,7 @@ class WorksServiceImpl(WorksServicer):
                              header_imageURL=work.header_imageURL, team_name=team.name)
         return None
 
-    def GetWorksListByTermName(self, request: GetWorksByNameRequest) -> GetWorksListByTeamNameReply:
+    def GetWorksListByTeamName(self, request: GetWorksByNameRequest) -> GetWorksListByTeamNameReply:
         session = instance.database.get_db_session()
         works = get_works_list_by_term_name(request.name, session)
         if works is None:
@@ -141,6 +141,14 @@ class WorksServiceImpl(WorksServicer):
         update_work_info(works_info, session)
         update_work(works, session)
         return Empty()
+
+    def GetUserIsTeamAdmin(self, request: GetUserIsTeamAdminRequest) -> Empty:
+        session = instance.database.get_db_session()
+        is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
+        if is_admin:
+            return Empty()
+
+        raise HTTPException(status_code=403)
 
 
 register_works_http_server(register_fastapi_route, WorksServiceImpl(), parse_request, parse_reply)
