@@ -12,6 +12,7 @@ from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
 from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
+from dao.user_dao import get_userinfo_by_id
 from dao.works_dao import *
 from core.router_register import parse_request, parse_reply, register_fastapi_route, request_context
 
@@ -136,8 +137,9 @@ class WorksServiceImpl(WorksServicer):
         if work is not None:
             # 将数组转换为字符串
             url_list: string = ",".join(request.image_url_list)
-            work_info = WorksInfoEntity(request.team_id, url_list, request.content, request.file_id,
-                                        work.id)
+            work_info = WorksInfoEntity(team_id=request.team_id, image_url_list=url_list, content=request.content,
+                                        file_id=request.file_id,
+                                        works_id=work.id)
             create_works_info(work_info, session)
             return CreateWorksReply(id=work.id)
         else:
