@@ -41,7 +41,7 @@ def listen_minio_events(minio_client: MinioClient, database: Database):
                     e_tag = event_dict['s3']['object']['eTag']
                     session = database.get_db_session()
                     file = session.query(FileEntity).filter(FileEntity.deleted == False,
-                                                            FileEntity.e_tag == e_tag).first()
+                                                            FileEntity.e_tag == file_name).first()
 
                     if file is None:
                         file_info = FileEntity()
@@ -55,6 +55,5 @@ def listen_minio_events(minio_client: MinioClient, database: Database):
                         file.is_Upload = True
                         session.merge(file)
                         session.commit()
-
 
     return minio_event

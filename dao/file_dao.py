@@ -26,4 +26,4 @@ def get_file_info_by_name(file_name: str, session: Session) -> FileEntity | None
 
 
 def get_file_info_by_tag(file_tag: str, session: Session) -> FileEntity | None:
-    return session.query(FileEntity).filter(FileEntity.file_name == file_tag, FileEntity.deleted == False).first()
+    return session.query(FileEntity).filter(FileEntity.e_tag == file_tag, FileEntity.deleted == False).first()
