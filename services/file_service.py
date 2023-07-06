@@ -45,8 +45,9 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_put_object('web', file.e_tag)
-        return GetDownloadUrlReply(url=url)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+
+        return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
     def GetDownloadUrlByFileName(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()
@@ -54,8 +55,9 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_put_object('web', file.e_tag)
-        return GetDownloadUrlReply(url=url)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+
+        return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
     def GetDownloadUrlByTag(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()
@@ -63,8 +65,9 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_put_object('web', file.e_tag)
-        return GetDownloadUrlReply(url=url)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+
+        return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
 
 register_file_http_server(register_fastapi_route, FileServiceImpl(), parse_request, parse_reply)
