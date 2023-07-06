@@ -51,5 +51,10 @@ def listen_minio_events(minio_client: MinioClient, database: Database):
 
                         session.add(file_info)
                         session.commit()
+                    else:
+                        file.is_Upload = True
+                        session.merge(file)
+                        session.commit()
+
 
     return minio_event
