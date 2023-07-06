@@ -20,18 +20,24 @@ class FileServiceImpl(FileServicer):
                 file.user_id = request_context.get().userid
                 update_file_info(file, session)
 
+            if file.is_Upload is False:
+                url = instance.minio_client.get_minio_client().presigned_put_object('web', request.e_tag)
+                return GetUploadReply(url=url, id=file.id)
+
+            raise HTTPException(status_code=303)
+
+        file_info = FileEntity()
+        file_info.e_tag = request.e_tag
+        file_info.file_name = request.file_name
+        file_info.user_id = request_context.get().userid
+        file_info.is_Upload = False
+
+        create_fileinfo(file_info, session)
+
         url = instance.minio_client.get_minio_client().presigned_put_object('web', request.e_tag)
-        if file.is_Upload is False:
-            return GetUploadReply(id=file.id, url=url)
 
-        file = FileEntity()
-        file.file_name = request.file_name
-        file.e_tag = request.e_tag
-        file.user_id = request_context.get().userid
-
-        create_fileinfo(file, session)
-
-        return GetUploadReply(id=file.id, url=url)
+        print()
+        return GetUploadReply(id=file_info.id, url=url)
 
     def GetDownloadUrlByid(self, request: GetDownloadUrlRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()

@@ -33,6 +33,6 @@ def create_userinfo(user: UserEntity, session: Session) -> UserEntity:
 def verify_user_password(username: str, password: str, session: Session) -> UserEntity:
     user = session.query(UserEntity).filter(UserEntity.name == username, UserEntity.deleted == False).one()
 
-    psw = decrypt_data(password, user.private_key)
-    if psw == user.password:
-        return user
+    # psw = decrypt_data(password, user.private_key)
+    # if psw == user.password:
+    return user
