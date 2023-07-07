@@ -1,20 +1,17 @@
-import random
 import string
 
 from fastapi import HTTPException
 from google.protobuf.empty_pb2 import Empty
 
-from api.thgamejam.works import works_pb2 as api_dot_thgamejam_dot_works_dot_works__pb2
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
     GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest, \
     GetWorksByTeamIdListRequest, GetWorksListByTeamIdListReply
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
-from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
-from dao.user_dao import get_userinfo_by_id
-from dao.works_dao import *
 from core.router_register import parse_request, parse_reply, register_fastapi_route, request_context
+from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
+from dao.works_dao import *
 
 
 class WorksServiceImpl(WorksServicer):
@@ -115,14 +112,19 @@ class WorksServiceImpl(WorksServicer):
     def GetWorksDetailsById(self, request: WorksIdRequest) -> WorkDetails:
         session = instance.database.get_db_session()
         work_info = get_works_info_by_id(request.works_id, session)
+
         if work_info is None:
             raise HTTPException(status_code=404, detail="Works not find")
-
+        print(work_info.image_url_list)
         works = get_works_by_id(request.works_id, session)
         team = get_team_name_by_team_id(work_info.team_id, session)
+        img_url_list = []
+        for url in work_info.image_url_list.split(','):
+            img_url_list.append(url)
+        print(img_url_list)
         return WorkDetails(works_id=works.id, team_id=team.id, content=work_info.content, works_name=works.name,
                            header_imageURL=works.header_imageURL, file_id=work_info.file_id,
-                           image_url_list=work_info.image_url_list)
+                           image_url_list=img_url_list)
 
     # 创建作品
     def CreateWorks(self, request: CreateWorksRequest) -> CreateWorksReply | None:
