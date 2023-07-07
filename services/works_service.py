@@ -1,20 +1,36 @@
 import string
 
 from fastapi import HTTPException
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
 
+from api.thgamejam.works import works_pb2 as api_dot_thgamejam_dot_works_dot_works__pb2
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
     GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest, \
-    GetWorksByTeamIdListRequest, GetWorksListByTeamIdListReply
+    GetWorksByTeamIdListRequest, GetWorksListByTeamIdListReply, GetAllWorksByUserReply
 from api.thgamejam.works.works_pb2_http import WorksServicer, register_works_http_server
 from core.app import instance
 from core.router_register import parse_request, parse_reply, register_fastapi_route, request_context
-from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id
+from dao.team_dao import verify_user_id_team_admin, get_team_name_by_team_id, get_join_team_list_by_userid
 from dao.works_dao import *
 
 
 class WorksServiceImpl(WorksServicer):
+
+    def GetAllWorksByUserRequest(self, request: Empty) -> GetAllWorksByUserReply:
+        session = instance.database.get_db_session()
+        team_list = get_join_team_list_by_userid(request_context.get().userid, session)
+        team_ids = []
+        for tid in team_list:
+            team_ids.append(tid.id)
+        infos = get_work_list_by_team_id_list(team_ids, session)
+        works_list = []
+        for works in infos:
+            team = get_team_name_by_team_id(works.team_id, session)
+            works_list.append(WorksInfo(id=works.id, team_id=works.team_id, work_name=works.name, team_name=team.name,
+                                        header_imageURL=works.header_imageURL))
+        return GetAllWorksByUserReply(work_list=works_list)
 
     def GetWorksListByTeamIdList(self, request: GetWorksByTeamIdListRequest) -> GetWorksListByTeamIdListReply:
         session = instance.database.get_db_session()
