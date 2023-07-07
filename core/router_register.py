@@ -7,7 +7,7 @@ from typing import Callable as _Callable, Any as _Any, Dict as _Dict
 
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.message import Message
-from jwt import InvalidSignatureError, ExpiredSignatureError
+from jwt import InvalidSignatureError, ExpiredSignatureError, DecodeError
 from starlette.responses import JSONResponse, RedirectResponse
 
 from config.conf import settings
@@ -65,23 +65,28 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
     return endpoint
 
 
-def token_check_interceptor(request: Request) ->bool:
-    if any(request.url.path.startswith(router) for router in token_check_router):
-        token = request.cookies.get("token")
+def token_check_interceptor(request: Request) -> bool:
+    check = any(request.url.path.startswith(router) for router in token_check_router)
 
-        if token is None:
+    token = request.cookies.get("token")
+    if token is None:
+        if check:
             return False
-        else:
-            try:
-                user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
-                request_context.set(UserContext(userid=user_ctx['userid']))
 
-            except InvalidSignatureError:
-                return False
+    try:
+        user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
+        request_context.set(UserContext(userid=user_ctx['userid']))
+    except InvalidSignatureError:
+        if check:
+            return False
+    except ExpiredSignatureError:
+        if check:
+            return False
+    except DecodeError:
+        if check:
+            return False
 
-            except ExpiredSignatureError:
-                return False
-    return True
+        return True
 
 
 # token注入

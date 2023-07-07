@@ -1,7 +1,9 @@
 from Crypto.PublicKey import RSA
 from fastapi import HTTPException
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
 
+from api.thgamejam.user import user_pb2 as api_dot_thgamejam_dot_user_dot_user__pb2
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
     UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserIdInfoReply, \
     ChangeDescriptionRequest, GetUserIdByNameRequest, GetUserInfoByIdRequest, UserInfoReply
@@ -114,6 +116,9 @@ class UserServiceImpl(UserServicer):
         update_userinfo(user, session)
 
         return Empty()
+
+    def GetUserTokenInfoWithoutError(self, request: Empty) -> GetUserIdInfoReply:
+        return GetUserIdInfoReply(id=request_context.get().userid)
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)
