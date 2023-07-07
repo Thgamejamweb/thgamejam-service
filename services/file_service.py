@@ -45,7 +45,8 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag, response_headers={
+            'response-content-disposition': f'attachment; filename="{file.file_name}"'})
 
         return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
@@ -55,7 +56,8 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag, response_headers={
+            'response-content-disposition': f'attachment; filename="{file.file_name}"'})
 
         return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
@@ -65,7 +67,8 @@ class FileServiceImpl(FileServicer):
         if file is None:
             raise HTTPException(status_code=404, detail="file not found")
 
-        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag)
+        url = instance.minio_client.get_minio_client().presigned_get_object('web', file.e_tag, response_headers={
+            'response-content-disposition': f'attachment; filename="{file.file_name}"'})
 
         return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
