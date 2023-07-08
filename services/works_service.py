@@ -1,10 +1,7 @@
 import string
 
 from fastapi import HTTPException
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
-
-from api.thgamejam.works import works_pb2 as api_dot_thgamejam_dot_works_dot_works__pb2
 from api.thgamejam.works.works_pb2 import CreateWorksRequest, UpdateWorksRequest, WorksIdRequest, GetWorksByNameRequest, \
     CreateWorksReply, WorksInfo, GetWorksListByTeamNameReply, WorkDetails, DeleteWorksByIdRequest, GetWorksByIdRequest, \
     GetWorksListByTeamIdReply, GetRandom4DateReply, getWorksByReverseIdReply, GetUserIsTeamAdminRequest, \
@@ -17,7 +14,6 @@ from dao.works_dao import *
 
 
 class WorksServiceImpl(WorksServicer):
-
     def GetAllWorksByUserRequest(self, request: Empty) -> GetAllWorksByUserReply:
         session = instance.database.get_db_session()
         team_list = get_join_team_list_by_userid(request_context.get().userid, session)
@@ -165,16 +161,26 @@ class WorksServiceImpl(WorksServicer):
 
     # 更新作品
     def UpdateWorks(self, request: UpdateWorksRequest) -> Empty:
+        print("update")
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
-            raise HTTPException(status_code=403, detail="Forbidden")
-        works = WorksEntity(request.team_id, request.header_imageURL, request.name)
-        url_list: str = ",".join(request.image_url_list)
-        works_info = WorksInfoEntity(request.team_id, url_list, request.content, request.file_id,
-                                     request.works_id)
-        update_work_info(works_info, session)
+            raise HTTPException(status_code=403, detail="权限不足")
+        works = get_works_by_id(request.works_id, session)
+        if works is None:
+            raise HTTPException(status_code=500, detail="作品不存在")
+        works.header_imageURL = request.header_imageURL
+        works.name = request.name
         update_work(works, session)
+        url_list: str = ",".join(request.image_url_list)
+        works_info = get_works_info_by_id(works.id, session)
+        if works_info is None:
+            raise HTTPException(status_code=500, detail="更新失败")
+        works_info.team_id = request.team_id
+        works_info.image_url_list = url_list
+        works_info.content = request.content
+        works_info.file_id = request.file_id
+        update_work_info(works_info, session)
         return Empty()
 
     def GetUserIsTeamAdmin(self, request: GetUserIsTeamAdminRequest) -> Empty:

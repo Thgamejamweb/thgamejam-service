@@ -32,7 +32,7 @@ def get_works_by_name(name: str, session: Session) -> WorksEntity | None:
 
 
 def get_works_by_id(work_id: int, session: Session) -> WorksEntity | None:
-    return session.query(WorksEntity).filter(WorksEntity.id == work_id).one()
+    return session.query(WorksEntity).filter(WorksEntity.id == work_id).first()
 
 
 def get_works_list_by_term_name(term_name: str, session: Session) -> list[WorksEntity] | None:
