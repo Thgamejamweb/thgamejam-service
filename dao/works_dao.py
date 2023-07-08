@@ -49,8 +49,10 @@ def get_works_info_by_id(works_id: int, session: Session) -> WorksInfoEntity | N
 
 
 def delete_works_by_id(work_id: int, session: Session):
-    session.query(WorksEntity).filter(WorksEntity.id == work_id).one().delete()
-    session.query(WorksInfoEntity).filter(WorksInfoEntity.works_id == work_id).delete()
+    works = session.query(WorksEntity).filter(WorksEntity.id == work_id).one()
+    works_info = session.query(WorksInfoEntity).filter(WorksInfoEntity.works_id == work_id).one()
+    session.delete(works)
+    session.delete(works_info)
     session.commit()
 
 

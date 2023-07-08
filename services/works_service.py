@@ -88,7 +88,6 @@ class WorksServiceImpl(WorksServicer):
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
             raise HTTPException(status_code=403, detail="Forbidden")
-
         delete_works_by_id(request.work_id, session)
         return Empty()
 
