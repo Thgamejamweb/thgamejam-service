@@ -88,12 +88,16 @@ class WorksServiceImpl(WorksServicer):
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
             raise HTTPException(status_code=403, detail="Forbidden")
-        delete_works_by_id(request.work_id, session)
+        success = delete_works_by_id(request.work_id, session)
+        if success is False:
+            raise HTTPException(status_code=500, detail='删除失败')
         return Empty()
 
     def GetWorksById(self, request: WorksIdRequest) -> WorksInfo:
         session = instance.database.get_db_session()
         works = get_works_by_id(request.works_id, session)
+        if works is None:
+            raise HTTPException(status_code=500, detail="作品不存在")
         team = get_team_name_by_team_id(works.team_id, session)
         return WorksInfo(work_name=works.name, team_id=team.id, team_name=team.name,
                          header_imageURL=works.header_imageURL)
@@ -101,6 +105,8 @@ class WorksServiceImpl(WorksServicer):
     def GetWorksByName(self, request: GetWorksByNameRequest) -> WorksInfo | None:
         session = instance.database.get_db_session()
         work = get_works_by_name(request.name, session=session)
+        if work is None:
+            raise HTTPException(status_code=500, detail="作品不存在")
         team = get_team_name_by_team_id(work.team_id, session)
         if team is not None:
             return WorksInfo(id=work.id, team_id=work.team_id, work_name=work.name,
