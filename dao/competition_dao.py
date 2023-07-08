@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -92,5 +92,14 @@ def get_score_competition_list(session: Session) -> list[CompetitionEntity]:
 
 def get_all_upload_works_by_competitionId(competition_id: int, session: Session) -> list[TeamCompetitionEntity]:
     works_ids = session.query(TeamCompetitionEntity).filter(TeamCompetitionEntity.competition_id == competition_id,
-                                                            TeamCompetitionEntity.works_id != None).all()
+                                                            TeamCompetitionEntity.works_id.isnot(None)).all()
     return works_ids
+
+
+def get_competition_detail_info_byid(competition_id: int, session: Session) -> CompetitionEntity:
+    return session.query(CompetitionEntity).filter(CompetitionEntity.id == competition_id).one()
+
+
+def get_detail_competition_info_byid(competition_id: int, session: Session) -> CompetitionInfoEntity:
+    return session.query(CompetitionInfoEntity).filter(CompetitionInfoEntity.competition_id == competition_id).one()
+
