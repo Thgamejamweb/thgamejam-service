@@ -36,7 +36,6 @@ class FileServiceImpl(FileServicer):
 
         url = instance.minio_client.get_minio_client().presigned_put_object('web', request.e_tag)
 
-        print()
         return GetUploadReply(id=file_info.id, url=url)
 
     def GetDownloadUrlByid(self, request: GetDownloadUrlRequest) -> GetDownloadUrlReply:

@@ -20,9 +20,10 @@ class WorksServiceImpl(WorksServicer):
         team_ids = []
         for tid in team_list:
             team_ids.append(tid.id)
-        infos = get_work_list_by_team_id_list(team_ids, session)
+        info_list = get_work_list_by_team_id_list(team_ids, session)
+
         works_list = []
-        for works in infos:
+        for works in info_list:
             team = get_team_name_by_team_id(works.team_id, session)
             works_list.append(WorksInfo(id=works.id, team_id=works.team_id, work_name=works.name, team_name=team.name,
                                         header_imageURL=works.header_imageURL))
@@ -61,7 +62,7 @@ class WorksServiceImpl(WorksServicer):
         work_list: list[WorksEntity] = get_reserve_eight_date(session)
         size = len(work_list)
         works = []
-        for i in range(8):
+        for i in range(size):
             kk = work_list[i]
             team = get_team_name_by_team_id(kk.team_id, session)
             works.append(WorksInfo(id=kk.id, team_id=kk.team_id, work_name=kk.name, team_name=team.name,

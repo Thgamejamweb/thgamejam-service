@@ -7,6 +7,7 @@ from modles.competition_entity import CompetitionEntity
 from modles.competition_info_entity import CompetitionInfoEntity
 from modles.team_competition_entity import TeamCompetitionEntity
 from modles.team_user_entity import TeamUserEntity
+from modles.works_entity import WorksEntity
 
 
 def get_competition_list_by_userid(user_id: int, session: Session) -> list[CompetitionEntity]:
@@ -63,6 +64,9 @@ def add_team_works_to_competition(competition_id: int, team_id: int, works_id: i
     if is_join_competition is None:
         return False
 
+    session.query(WorksEntity).filter(WorksEntity.id == works_id, WorksEntity.team_id == team_id,
+                                      WorksEntity.deleted == False).one()
+
     is_join_competition.works_id = works_id
     session.merge(is_join_competition)
     session.commit()
@@ -102,4 +106,3 @@ def get_competition_detail_info_byid(competition_id: int, session: Session) -> C
 
 def get_detail_competition_info_byid(competition_id: int, session: Session) -> CompetitionInfoEntity:
     return session.query(CompetitionInfoEntity).filter(CompetitionInfoEntity.competition_id == competition_id).one()
-

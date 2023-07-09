@@ -160,9 +160,10 @@ class CompetitionServiceImpl(CompetitionServicer):
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
+            print(request.works_id)
             raise HTTPException(status_code=403, detail="Forbidden")
 
-        is_join = add_team_works_to_competition(request.competition_id, request.works_id, request.works_id, session)
+        is_join = add_team_works_to_competition(request.competition_id, request.team_id, request.works_id, session)
         if is_join is False:
             raise HTTPException(status_code=403, detail="join error")
 

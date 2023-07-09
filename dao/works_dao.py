@@ -83,4 +83,4 @@ def get_reserve_eight_date(session: Session):
 
 
 def get_work_list_by_team_id_list(ids: list[int], session: Session) -> list[WorksEntity]:
-    return session.query(WorksEntity).filter(WorksEntity.id.in_(ids), WorksEntity.deleted == False).all()
+    return session.query(WorksEntity).filter(WorksEntity.team_id.in_(ids), WorksEntity.deleted == False).all()
