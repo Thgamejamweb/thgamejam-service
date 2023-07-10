@@ -38,7 +38,9 @@ token_check_router = ["/web/v1/user/change/password",
                       "/web/v1/competition/user",
                       "/web/v1/works/user",
                       "/web/v1/user/info/change",
-                      "/web/v1/works/admin"]
+                      "/web/v1/works/admin"
+                      "/web/v1/aigc/user"
+                      ]
 
 conf = settings.get()
 

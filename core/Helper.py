@@ -1,5 +1,7 @@
+import string
 from base64 import b64decode, b64encode
 
+import openai
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from cryptography.hazmat.primitives import serialization
@@ -30,3 +32,25 @@ def encrypt_data(data: str, public_key: str) -> str:
 
     # 将加密后的字节流进行Base64编码并返回
     return b64encode(encrypted_data).decode('utf-8')
+
+
+# 开源时此token已过期
+openai.api_key = "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"
+pretreatment = "请你不要联系上下文，仅对接下来*[]*内的内容进行总结和修饰*[{0}]*"
+
+
+# gpt
+def chat_with_gpt(input_text: str):
+    model_id = 'gpt-3.5-turbo'  # 使用的GPT模型
+
+    data = {
+        'model': model_id,
+        'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'},
+                     {'role': 'user', 'content': pretreatment.format(input_text)}]
+    }
+
+    response = openai.ChatCompletion.create(**data)
+
+    reply = response.choices[0].message.content
+
+    return reply
