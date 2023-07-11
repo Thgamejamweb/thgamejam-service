@@ -17,3 +17,7 @@ expiration_time = 604800
 endpoint = "<host>:<port>"
 access_key = "access_key"
 secret_key = "secret_key"
+
+[gpt]
+api_key = "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"
+proxy = "http://127.0.0.1:7890"

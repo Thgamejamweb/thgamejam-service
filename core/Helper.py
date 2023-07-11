@@ -1,4 +1,3 @@
-import string
 from base64 import b64decode, b64encode
 
 import openai
@@ -6,6 +5,8 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+
+from config.conf_pb2 import Bootstrap
 
 
 def decrypt_data(data: str, private_key: str) -> str:
@@ -34,9 +35,13 @@ def encrypt_data(data: str, public_key: str) -> str:
     return b64encode(encrypted_data).decode('utf-8')
 
 
-# 开源时此token已过期
-openai.api_key = "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"
 pretreatment = "请你不要联系上下文，仅对接下来*[]*内的内容进行总结和修饰*[{0}]*"
+
+
+def register_openai(conf: Bootstrap):
+    print(conf.gpt.api_key)
+    openai.api_key = conf.gpt.api_key
+    openai.proxy = conf.gpt.proxy
 
 
 # gpt
