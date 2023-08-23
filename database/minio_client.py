@@ -40,15 +40,20 @@ def listen_minio_events(minio_client: MinioClient, database: Database):
                 if event_name == 's3:ObjectCreated:Put':
                     e_tag = event_dict['s3']['object']['eTag']
                     session = database.get_db_session()
-                    file = session.query(FileEntity).filter(FileEntity.deleted is False,
-                                                            FileEntity.e_tag == e_tag).first()
-                    if file is None:
-                        file = FileEntity()
-                        file.file_name = file_name
-                        file.e_tag = e_tag
+                    file = session.query(FileEntity).filter(FileEntity.deleted == False,
+                                                            FileEntity.e_tag == file_name).first()
 
-                        session.add(file)
+                    if file is None:
+                        file_info = FileEntity()
+                        file_info.file_name = file_name
+                        file_info.e_tag = e_tag
+                        file_info.is_Upload = True
+
+                        session.add(file_info)
                         session.commit()
-                        session.close()
+                    else:
+                        file.is_Upload = True
+                        session.merge(file)
+                        session.commit()
 
     return minio_event

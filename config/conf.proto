@@ -25,9 +25,15 @@ message ObjectStorage {
   string secret_key = 3;
 }
 
+message Chatgpt {
+  string api_key = 1;
+  string proxy = 2;
+}
+
 message Bootstrap {
   Server server = 1;
   Database database = 2;
   JWT jwt = 3;
   ObjectStorage oss = 4;
+  Chatgpt gpt = 5;
 }

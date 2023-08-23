@@ -12,3 +12,7 @@ class CompetitionInfoEntity(BaseModel, base):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     competition_id = Column(BigInteger, nullable=False, comment='比赛id')
     content = Column(Text, nullable=False, comment='介绍页面富文本')
+
+    def __init__(self, competition_id, content):
+        self.competition_id = competition_id
+        self.content = content

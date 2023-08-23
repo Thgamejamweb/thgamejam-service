@@ -7,8 +7,8 @@ from typing import Callable as _Callable, Any as _Any, Dict as _Dict
 
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.message import Message
-from jwt import InvalidSignatureError, ExpiredSignatureError
-from starlette.responses import JSONResponse
+from jwt import InvalidSignatureError, ExpiredSignatureError, DecodeError
+from starlette.responses import JSONResponse, RedirectResponse
 
 from config.conf import settings
 from core.app import instance
@@ -34,7 +34,13 @@ token_check_router = ["/web/v1/user/change/password",
                       "/web/v1/user/id",
                       "/web/v1/user/change/description",
                       "/web/v1/file/upload/url",
-                      "/web/v1/team"]
+                      "/web/v1/team/user",
+                      "/web/v1/competition/user",
+                      "/web/v1/works/user",
+                      "/web/v1/user/info/change",
+                      "/web/v1/works/admin"
+                      "/web/v1/aigc/user"
+                      ]
 
 conf = settings.get()
 
@@ -48,7 +54,9 @@ def register_fastapi_route(methods: str, url: str, handler: _Callable[[_Dict[str
 # 拦截器
 def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[Request], _Any]:
     async def endpoint(request: Request) -> _Any:
-        token_check_interceptor(request)
+        check_token = token_check_interceptor(request)
+        if check_token is False:
+            raise HTTPException(status_code=401)
 
         body = await request.body()
         result = handler(request.path_params, body)
@@ -59,22 +67,28 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
     return endpoint
 
 
-def token_check_interceptor(request: Request):
-    if any(request.url.path.startswith(router) for router in token_check_router):
-        token = request.cookies.get("token")
+def token_check_interceptor(request: Request) -> bool:
+    check = any(request.url.path.startswith(router) for router in token_check_router)
 
-        if token is None:
-            raise HTTPException(status_code=401, detail="Unauthorized Token")
-        else:
-            try:
-                user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
-                request_context.set(UserContext(userid=user_ctx['userid']))
+    token = request.cookies.get("token")
+    if token is None:
+        if check:
+            return False
 
-            except InvalidSignatureError:
-                raise HTTPException(status_code=401, detail="Signature verification failed")
+    try:
+        user_ctx = parserToken(conf.jwt.secret_key, token, UserContext)
+        request_context.set(UserContext(userid=user_ctx['userid']))
+    except InvalidSignatureError:
+        if check:
+            return False
+    except ExpiredSignatureError:
+        if check:
+            return False
+    except DecodeError:
+        if check:
+            return False
 
-            except ExpiredSignatureError:
-                raise HTTPException(status_code=401, detail="Signature has expired")
+        return True
 
 
 # token注入

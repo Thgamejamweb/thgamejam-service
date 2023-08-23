@@ -1,10 +1,12 @@
 from Crypto.PublicKey import RSA
 from fastapi import HTTPException
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf.empty_pb2 import Empty
 
+from api.thgamejam.user import user_pb2 as api_dot_thgamejam_dot_user_dot_user__pb2
 from api.thgamejam.user.user_pb2 import GetUserPublicKeyReply, GetUserPublicKeyRequest, LoginRequest, LoginReply, \
     UserInfo, RegisterUserRequest, RegisterUserReply, ChangePasswordRequest, ChangePasswordReply, GetUserIdInfoReply, \
-    ChangeDescriptionRequest, GetUserIdByNameRequest
+    ChangeDescriptionRequest, GetUserIdByNameRequest, GetUserInfoByIdRequest, UserInfoReply
 
 from core.router_register import register_fastapi_route, parse_request, parse_reply, request_context, UserContext
 from api.thgamejam.user.user_pb2_http import UserServicer, register_user_http_server
@@ -68,7 +70,7 @@ class UserServiceImpl(UserServicer):
             raise HTTPException(status_code=404, detail="UserInfo not find")
 
         if user.password != request.old_password:
-            raise HTTPException(status_code=401, detail="Password error")
+            raise HTTPException(status_code=404, detail="Password error")
 
         user.password = request.new_password
         update_userinfo(user, session)
@@ -92,6 +94,31 @@ class UserServiceImpl(UserServicer):
         user = get_userinfo_by_username(request.name, session)
 
         return GetUserIdInfoReply(id=user.id)
+
+    def GetUserInfoById(self, request: GetUserInfoByIdRequest) -> UserInfoReply:
+        session = instance.database.get_db_session()
+        user = get_userinfo_by_id(request.user_id, session)
+
+        return UserInfoReply(id=user.id, name=user.name, description=user.description, avatar_image=user.avatar_image,
+                             is_staff=user.is_staff)
+
+    def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
+        session = instance.database.get_db_session()
+        user = get_userinfo_by_id(request_context.get().userid, session)
+
+        if request.name is not None:
+            user.name = request.name
+        if request.description is not None:
+            user.description = request.description
+        if request.avatar_image is not None:
+            user.avatar_image = request.avatar_image
+
+        update_userinfo(user, session)
+
+        return Empty()
+
+    def GetUserTokenInfoWithoutError(self, request: Empty) -> GetUserIdInfoReply:
+        return GetUserIdInfoReply(id=request_context.get().userid)
 
 
 register_user_http_server(register_fastapi_route, UserServiceImpl(), parse_request, parse_reply)

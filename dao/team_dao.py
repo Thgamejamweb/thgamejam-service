@@ -6,7 +6,7 @@ from modles.team_user_entity import TeamUserEntity
 from modles.user_entity import UserEntity
 
 
-def get_team_number_by_team_id(team_id: int, session: Session) -> list[UserEntity]:
+def get_team_member_by_team_id(team_id: int, session: Session) -> list[UserEntity]:
     session.query(TeamEntity).filter(TeamEntity.id == team_id, TeamEntity.deleted == False).one()
 
     users = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.is_join == True,
@@ -43,18 +43,25 @@ def change_team_name(team_id: int, team_name: str, session: Session):
 
 
 def verify_user_id_team_admin(user_id: int, team_id: int, session: Session) -> bool:
-    session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.user_id == user_id,
-                                         TeamUserEntity.is_admin == True, TeamUserEntity.deleted == False).one()
+    team_info = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id,
+                                                     TeamUserEntity.user_id == user_id,
+                                                     TeamUserEntity.is_admin == True,
+                                                     TeamUserEntity.deleted == False).first()
+    if team_info is None:
+        return False
     return True
 
 
-def add_user_into_team(user_id: int, team_id: int, session: Session):
+def add_user_into_team(user_id: int, team_id: int, session: Session) -> bool:
     user = session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id, TeamUserEntity.user_id == user_id,
                                                 TeamUserEntity.deleted == False).first()
 
     if user is None:
         session.add(TeamUserEntity(team_id=team_id, user_id=user_id, is_join=False, is_admin=False))
         session.commit()
+        return True
+
+    return False
 
 
 def get_user_add_team_info(user_id: int, team_id: int, session: Session) -> TeamUserEntity | None:
@@ -82,3 +89,38 @@ def delete_user_in_team_info(user_id: int, team_id: int, session: Session):
 def delete_team(team_id: int, session: Session):
     session.query(TeamEntity).filter(TeamEntity.id == team_id).delete()
     session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id).delete()
+    session.commit()
+
+
+def delete_team_info(team_id: int, user_id: int, session: Session):
+    session.query(TeamUserEntity).filter(TeamUserEntity.team_id == team_id,
+                                         TeamUserEntity.user_id == user_id,
+                                         TeamUserEntity.is_admin == False,
+                                         TeamUserEntity.is_join == False,
+                                         TeamUserEntity.deleted == False).delete()
+    session.commit()
+
+
+def get_join_team_list_by_userid(user_id: int, session: Session) -> list[TeamEntity]:
+    team_into_list = session.query(TeamUserEntity).filter(TeamUserEntity.user_id == user_id,
+                                                          TeamUserEntity.is_join == True,
+                                                          TeamUserEntity.deleted == False).all()
+    team_list = []
+    for team in team_into_list:
+        team_list.append(session.query(TeamEntity).filter(TeamEntity.id == team.team_id).one())
+
+    return team_list
+
+
+def get_all_not_join_team_list_by_userid(user_id: int, session: Session) -> list[TeamEntity]:
+    team_into_list = session.query(TeamUserEntity).filter(TeamUserEntity.user_id == user_id,
+                                                          TeamUserEntity.is_join == False,
+                                                          TeamUserEntity.deleted == False).all()
+    team_list = []
+    for team in team_into_list:
+        team_list.append(session.query(TeamEntity).filter(TeamEntity.id == team.team_id).one())
+    return team_list
+
+
+def get_team_name_by_team_id(team_id: int, session: Session) -> TeamEntity:
+    return session.query(TeamEntity).filter(TeamEntity.id == team_id).first()
