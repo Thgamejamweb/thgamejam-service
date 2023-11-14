@@ -59,7 +59,7 @@ def register(handler: _Callable[[_Dict[str, _Any], bytes], _Any]) -> _Callable[[
             raise HTTPException(status_code=401)
 
         body = await request.body()
-        result = handler(request.path_params, body)
+        result = await handler(request.path_params, body)
         response = JSONResponse(result)
 
         return token_provide_interceptor(request, response)
