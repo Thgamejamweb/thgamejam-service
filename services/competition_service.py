@@ -22,7 +22,7 @@ from modles.competition_entity import CompetitionEntity
 
 class CompetitionServiceImpl(CompetitionServicer):
 
-    def GetWorksListByCompetitionId(self, request: GetWorksListByCompetitionIdRequest) -> WorksListReply:
+    async def GetWorksListByCompetitionId(self, request: GetWorksListByCompetitionIdRequest) -> WorksListReply:
         session = instance.database.get_db_session()
         works_ids = get_all_upload_works_by_competitionId(request.competition_id, session)
 
@@ -36,7 +36,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return WorksListReply(list=works_list)
 
-    def GetSignupCompetitionList(self, request: Empty) -> CompetitionListReply:
+    async def GetSignupCompetitionList(self, request: Empty) -> CompetitionListReply:
         session = instance.database.get_db_session()
         competition_info_list = get_signup_competition_list(session)
 
@@ -50,7 +50,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CompetitionListReply(list=competitions)
 
-    def GetStartCompetitionList(self, request: Empty) -> CompetitionListReply:
+    async def GetStartCompetitionList(self, request: Empty) -> CompetitionListReply:
         session = instance.database.get_db_session()
         competition_info_list = get_start_competition_list(session)
 
@@ -64,7 +64,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CompetitionListReply(list=competitions)
 
-    def GetEndCompetitionList(self, request: Empty) -> CompetitionListReply:
+    async def GetEndCompetitionList(self, request: Empty) -> CompetitionListReply:
         session = instance.database.get_db_session()
         competition_info_list = get_score_competition_list(session)
 
@@ -78,7 +78,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CompetitionListReply(list=competitions)
 
-    def GetUserJoinCompetitionList(self, request: GetUserJoinCompetitionListRequest) -> CompetitionListReply:
+    async def GetUserJoinCompetitionList(self, request: GetUserJoinCompetitionListRequest) -> CompetitionListReply:
         session = instance.database.get_db_session()
         competition_info_list = get_competition_list_by_userid(request.user_id, session)
 
@@ -92,7 +92,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CompetitionListReply(list=list(competitions.values()))
 
-    def GetTeamJoinCompetitionList(self, request: GetTeamJoinCompetitionListRequest) -> CompetitionListReply:
+    async def GetTeamJoinCompetitionList(self, request: GetTeamJoinCompetitionListRequest) -> CompetitionListReply:
         session = instance.database.get_db_session()
         competition_info_list = get_competition_info_by_team_id(request.team_id, session)
 
@@ -106,7 +106,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CompetitionListReply(list=competitions)
 
-    def GetUserIsStaff(self, request: Empty) -> Empty:
+    async def GetUserIsStaff(self, request: Empty) -> Empty:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
@@ -117,7 +117,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return Empty()
 
-    def CreateCompetition(self, request: CreateCompetitionRequest) -> CreateCompetitionReply:
+    async def CreateCompetition(self, request: CreateCompetitionRequest) -> CreateCompetitionReply:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
@@ -146,7 +146,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return CreateCompetitionReply(competition_id=competition.id)
 
-    def JoinCompetition(self, request: JoinCompetitionRequest) -> Empty:
+    async def JoinCompetition(self, request: JoinCompetitionRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -156,7 +156,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return Empty()
 
-    def AddCompetitionWorks(self, request: AddWorksRequest) -> Empty:
+    async def AddCompetitionWorks(self, request: AddWorksRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -169,7 +169,7 @@ class CompetitionServiceImpl(CompetitionServicer):
 
         return Empty()
 
-    def GetCompetitionDetailInfo(self, request: GetCompetitionDetailInfoRequest) -> CompetitionDetailReply:
+    async def GetCompetitionDetailInfo(self, request: GetCompetitionDetailInfoRequest) -> CompetitionDetailReply:
         session = instance.database.get_db_session()
         competition = get_competition_detail_info_byid(request.competition_id, session)
         competition_info = get_detail_competition_info_byid(request.competition_id, session)

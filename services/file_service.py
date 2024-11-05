@@ -11,7 +11,7 @@ from modles.file_entity import FileEntity
 
 
 class FileServiceImpl(FileServicer):
-    def GetUploadUrl(self, request: GetUploadUrlRequest) -> GetUploadReply:
+    async def GetUploadUrl(self, request: GetUploadUrlRequest) -> GetUploadReply:
         session = instance.database.get_db_session()
         file = verify_file_eTag(request.e_tag, session)
 
@@ -38,7 +38,7 @@ class FileServiceImpl(FileServicer):
 
         return GetUploadReply(id=file_info.id, url=url)
 
-    def GetDownloadUrlByid(self, request: GetDownloadUrlRequest) -> GetDownloadUrlReply:
+    async def GetDownloadUrlByid(self, request: GetDownloadUrlRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()
         file = get_file_info_by_id(request.id, session)
         if file is None:
@@ -49,7 +49,7 @@ class FileServiceImpl(FileServicer):
 
         return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
-    def GetDownloadUrlByFileName(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
+    async def GetDownloadUrlByFileName(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()
         file = get_file_info_by_name(request.info, session)
         if file is None:
@@ -60,7 +60,7 @@ class FileServiceImpl(FileServicer):
 
         return GetDownloadUrlReply(url=url, file_name=file.file_name)
 
-    def GetDownloadUrlByTag(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
+    async def GetDownloadUrlByTag(self, request: GetDownloadUrlByStrRequest) -> GetDownloadUrlReply:
         session = instance.database.get_db_session()
         file = get_file_info_by_tag(request.info, session)
         if file is None:

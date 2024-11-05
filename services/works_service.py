@@ -14,7 +14,7 @@ from dao.works_dao import *
 
 
 class WorksServiceImpl(WorksServicer):
-    def GetAllWorksByUserRequest(self, request: Empty) -> GetAllWorksByUserReply:
+    async def GetAllWorksByUserRequest(self, request: Empty) -> GetAllWorksByUserReply:
         session = instance.database.get_db_session()
         team_list = get_join_team_list_by_userid(request_context.get().userid, session)
         team_ids = []
@@ -29,7 +29,7 @@ class WorksServiceImpl(WorksServicer):
                                         header_imageURL=works.header_imageURL))
         return GetAllWorksByUserReply(work_list=works_list)
 
-    def GetWorksListByTeamIdList(self, request: GetWorksByTeamIdListRequest) -> GetWorksListByTeamIdListReply:
+    async def GetWorksListByTeamIdList(self, request: GetWorksByTeamIdListRequest) -> GetWorksListByTeamIdListReply:
         session = instance.database.get_db_session()
         lists = request.team_id_list
         ids = []
@@ -43,7 +43,7 @@ class WorksServiceImpl(WorksServicer):
                                          header_imageURL=work.header_imageURL))
         return GetWorksListByTeamIdListReply(works_list=works_lists)
 
-    def GetRandom4DateRequest(self, request: Empty) -> GetRandom4DateReply:
+    async def GetRandom4DateRequest(self, request: Empty) -> GetRandom4DateReply:
         session = instance.database.get_db_session()
         work_list = get_random_four_date(session)
         size = len(work_list)
@@ -57,7 +57,7 @@ class WorksServiceImpl(WorksServicer):
                                    header_imageURL=kk.header_imageURL))
         return GetRandom4DateReply(works_list=works)
 
-    def GetWorksByReverseIdRequest(self, request: Empty) -> getWorksByReverseIdReply:
+    async def GetWorksByReverseIdRequest(self, request: Empty) -> getWorksByReverseIdReply:
         session = instance.database.get_db_session()
         work_list: list[WorksEntity] = get_reserve_eight_date(session)
         size = len(work_list)
@@ -69,7 +69,7 @@ class WorksServiceImpl(WorksServicer):
                                    header_imageURL=kk.header_imageURL))
         return getWorksByReverseIdReply(works_list=works)
 
-    def GetWorksListByTeamId(self, request: GetWorksByIdRequest) -> GetWorksListByTeamIdReply:
+    async def GetWorksListByTeamId(self, request: GetWorksByIdRequest) -> GetWorksListByTeamIdReply:
         session = instance.database.get_db_session()
         works = get_works_list_by_term_id(request.team_id, session)
         team = get_team_name_by_team_id(request.team_id, session)
@@ -83,7 +83,7 @@ class WorksServiceImpl(WorksServicer):
 
         return GetWorksListByTeamIdReply(work_list=works_list)
 
-    def DeleteWorksById(self, request: DeleteWorksByIdRequest) -> Empty:
+    async def DeleteWorksById(self, request: DeleteWorksByIdRequest) -> Empty:
         session = instance.database.get_db_session()
 
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
@@ -94,7 +94,7 @@ class WorksServiceImpl(WorksServicer):
             raise HTTPException(status_code=500, detail='删除失败')
         return Empty()
 
-    def GetWorksById(self, request: WorksIdRequest) -> WorksInfo:
+    async def GetWorksById(self, request: WorksIdRequest) -> WorksInfo:
         session = instance.database.get_db_session()
         works = get_works_by_id(request.works_id, session)
         if works is None:
@@ -103,7 +103,7 @@ class WorksServiceImpl(WorksServicer):
         return WorksInfo(work_name=works.name, team_id=team.id, team_name=team.name,
                          header_imageURL=works.header_imageURL)
 
-    def GetWorksByName(self, request: GetWorksByNameRequest) -> WorksInfo | None:
+    async def GetWorksByName(self, request: GetWorksByNameRequest) -> WorksInfo | None:
         session = instance.database.get_db_session()
         work = get_works_by_name(request.name, session=session)
         if work is None:
@@ -114,7 +114,7 @@ class WorksServiceImpl(WorksServicer):
                              header_imageURL=work.header_imageURL, team_name=team.name)
         return None
 
-    def GetWorksListByTeamName(self, request: GetWorksByNameRequest) -> GetWorksListByTeamNameReply:
+    async def GetWorksListByTeamName(self, request: GetWorksByNameRequest) -> GetWorksListByTeamNameReply:
         session = instance.database.get_db_session()
         works = get_works_list_by_term_name(request.name, session)
         if works is None:
@@ -127,7 +127,7 @@ class WorksServiceImpl(WorksServicer):
 
         return GetWorksListByTeamNameReply(work_list=works_list)
 
-    def GetWorksDetailsById(self, request: WorksIdRequest) -> WorkDetails:
+    async def GetWorksDetailsById(self, request: WorksIdRequest) -> WorkDetails:
         session = instance.database.get_db_session()
         work_info = get_works_info_by_id(request.works_id, session)
 
@@ -145,7 +145,7 @@ class WorksServiceImpl(WorksServicer):
                            image_url_list=img_url_list)
 
     # 创建作品
-    def CreateWorks(self, request: CreateWorksRequest) -> CreateWorksReply | None:
+    async def CreateWorks(self, request: CreateWorksRequest) -> CreateWorksReply | None:
         session = instance.database.get_db_session()
         # 是否是队长
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
@@ -166,7 +166,7 @@ class WorksServiceImpl(WorksServicer):
             raise HTTPException(status_code=500, detail="作品名重复")
 
     # 更新作品
-    def UpdateWorks(self, request: UpdateWorksRequest) -> Empty:
+    async def UpdateWorks(self, request: UpdateWorksRequest) -> Empty:
         print("update")
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
@@ -189,7 +189,7 @@ class WorksServiceImpl(WorksServicer):
         update_work_info(works_info, session)
         return Empty()
 
-    def GetUserIsTeamAdmin(self, request: GetUserIsTeamAdminRequest) -> Empty:
+    async def GetUserIsTeamAdmin(self, request: GetUserIsTeamAdminRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin:

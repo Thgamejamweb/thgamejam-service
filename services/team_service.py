@@ -14,7 +14,7 @@ from dao.user_dao import get_userinfo_by_id
 
 
 class TeamServiceImpl(TeamServicer):
-    def GetTeamMemberList(self, request: GetTeamMemberListRequest) -> GetTeamMemberListReply:
+    async def GetTeamMemberList(self, request: GetTeamMemberListRequest) -> GetTeamMemberListReply:
         session = instance.database.get_db_session()
         users = get_team_member_by_team_id(request.team_id, session)
 
@@ -24,7 +24,7 @@ class TeamServiceImpl(TeamServicer):
 
         return GetTeamMemberListReply(list=user_list)
 
-    def JoinTeam(self, request: SetTeamMemberRequest) -> Empty:
+    async def JoinTeam(self, request: SetTeamMemberRequest) -> Empty:
         session = instance.database.get_db_session()
         user_info = get_user_add_team_info(request_context.get().userid, request.team_id, session)
         if user_info is None:
@@ -33,7 +33,7 @@ class TeamServiceImpl(TeamServicer):
         user_join_team(user_info, session)
         return Empty()
 
-    def AddTeamMember(self, request: SetTeamMemberRequest) -> Empty:
+    async def AddTeamMember(self, request: SetTeamMemberRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -49,7 +49,7 @@ class TeamServiceImpl(TeamServicer):
 
         return Empty()
 
-    def DeleteTeamMember(self, request: SetTeamMemberRequest) -> Empty:
+    async def DeleteTeamMember(self, request: SetTeamMemberRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -58,7 +58,7 @@ class TeamServiceImpl(TeamServicer):
         delete_user_in_team_info(request.user_id, request.team_id, session)
         return Empty()
 
-    def CreateTeam(self, request: CreateTeamRequest) -> CreateTeamReply:
+    async def CreateTeam(self, request: CreateTeamRequest) -> CreateTeamReply:
         session = instance.database.get_db_session()
 
         team = create_team(request.name, request_context.get().userid, session)
@@ -67,7 +67,7 @@ class TeamServiceImpl(TeamServicer):
 
         return CreateTeamReply(team_id=team.id)
 
-    def DeleteTeam(self, request: DeleteTeamRequest) -> Empty:
+    async def DeleteTeam(self, request: DeleteTeamRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -76,7 +76,7 @@ class TeamServiceImpl(TeamServicer):
         delete_team(request.team_id, session)
         return Empty()
 
-    def ChangeTeamName(self, request: ChangeTeamNameRequest) -> Empty:
+    async def ChangeTeamName(self, request: ChangeTeamNameRequest) -> Empty:
         session = instance.database.get_db_session()
         is_admin = verify_user_id_team_admin(request_context.get().userid, request.team_id, session)
         if is_admin is False:
@@ -86,13 +86,13 @@ class TeamServiceImpl(TeamServicer):
 
         return Empty()
 
-    def RejectJoinTeam(self, request: RejectJoinTeamRequest) -> Empty:
+    async def RejectJoinTeam(self, request: RejectJoinTeamRequest) -> Empty:
         session = instance.database.get_db_session()
         delete_team_info(request.team_id, request_context.get().userid, session)
 
         return Empty()
 
-    def GetUserJoinAllTeamList(self, request: GetUserJoinAllTeamListRequest) -> GetUserAllTeamListReply:
+    async def GetUserJoinAllTeamList(self, request: GetUserJoinAllTeamListRequest) -> GetUserAllTeamListReply:
         session = instance.database.get_db_session()
 
         team_info_list = get_join_team_list_by_userid(request.user_id, session)
@@ -103,7 +103,7 @@ class TeamServiceImpl(TeamServicer):
 
         return GetUserAllTeamListReply(list=team_list)
 
-    def GetAllRequestTeamList(self, request: Empty) -> GetUserAllTeamListReply:
+    async def GetAllRequestTeamList(self, request: Empty) -> GetUserAllTeamListReply:
         session = instance.database.get_db_session()
 
         team_info_list = get_all_not_join_team_list_by_userid(request_context.get().userid, session)

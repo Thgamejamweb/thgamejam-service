@@ -37,7 +37,7 @@ class UserServiceImpl(UserServicer):
 
         return GetUserPublicKeyReply(public_key=user.public_key)
 
-    def Login(self, request: LoginRequest) -> LoginReply:
+    async def Login(self, request: LoginRequest) -> LoginReply:
         session = instance.database.get_db_session()
         user = verify_user_password(request.username, request.password, session)
 
@@ -45,7 +45,7 @@ class UserServiceImpl(UserServicer):
 
         return LoginReply(user=UserInfo(username=user.name))
 
-    def RegisterUser(self, request: RegisterUserRequest) -> RegisterUserReply:
+    async def RegisterUser(self, request: RegisterUserRequest) -> RegisterUserReply:
         session = instance.database.get_db_session()
 
         user_info = get_userinfo_by_username(request.username, session)
@@ -56,6 +56,7 @@ class UserServiceImpl(UserServicer):
         user = UserEntity()
         user.name = request.username
         user.password = request.password
+        user.email = request.email
         user.private_key = key.export_key().decode('utf-8')
         user.public_key = key.publickey().export_key().decode('utf-8')
         u = create_userinfo(user, session)
@@ -63,7 +64,7 @@ class UserServiceImpl(UserServicer):
         request_context.set(UserContext(userid=user.id))
         return RegisterUserReply(id=u.id, username=u.name)
 
-    def ChangePassword(self, request: ChangePasswordRequest) -> ChangePasswordReply:
+    async def ChangePassword(self, request: ChangePasswordRequest) -> ChangePasswordReply:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
@@ -76,10 +77,10 @@ class UserServiceImpl(UserServicer):
         update_userinfo(user, session)
         return ChangePasswordReply(id=user.id)
 
-    def GetUserTokenInfo(self, request: Empty) -> GetUserIdInfoReply:
+    async def GetUserTokenInfo(self, request: Empty) -> GetUserIdInfoReply:
         return GetUserIdInfoReply(id=request_context.get().userid)
 
-    def ChangeDescription(self, request: ChangeDescriptionRequest) -> Empty:
+    async def ChangeDescription(self, request: ChangeDescriptionRequest) -> Empty:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
         if user is None:
@@ -89,20 +90,20 @@ class UserServiceImpl(UserServicer):
         update_userinfo(user, session)
         return Empty()
 
-    def GetUserIdByName(self, request: GetUserIdByNameRequest) -> GetUserIdInfoReply:
+    async def GetUserIdByName(self, request: GetUserIdByNameRequest) -> GetUserIdInfoReply:
         session = instance.database.get_db_session()
         user = get_userinfo_by_username(request.name, session)
 
         return GetUserIdInfoReply(id=user.id)
 
-    def GetUserInfoById(self, request: GetUserInfoByIdRequest) -> UserInfoReply:
+    async def GetUserInfoById(self, request: GetUserInfoByIdRequest) -> UserInfoReply:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request.user_id, session)
 
         return UserInfoReply(id=user.id, name=user.name, description=user.description, avatar_image=user.avatar_image,
                              is_staff=user.is_staff)
 
-    def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
+    async def ChangeUserInfo(self, request: UserInfoReply) -> Empty:
         session = instance.database.get_db_session()
         user = get_userinfo_by_id(request_context.get().userid, session)
 
@@ -117,7 +118,7 @@ class UserServiceImpl(UserServicer):
 
         return Empty()
 
-    def GetUserTokenInfoWithoutError(self, request: Empty) -> GetUserIdInfoReply:
+    async def GetUserTokenInfoWithoutError(self, request: Empty) -> GetUserIdInfoReply:
         return GetUserIdInfoReply(id=request_context.get().userid)
 
 
